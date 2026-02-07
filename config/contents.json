@@ -1,0 +1,25 @@
+{
+  "onboarding": [
+    {
+      "id": "welcome",
+      "title": "Welcome to App",
+      "subtitle": "The best app for your needs."
+    },
+    {
+      "id": "discover",
+      "title": "Discover Features",
+      "subtitle": "Powerful tools designed to make your life easier."
+    },
+    {
+      "id": "get_started",
+      "title": "Ready to Go?",
+      "subtitle": "Start your journey now and unlock your potential."
+    }
+  ],
+  "paywall": {
+    "title": "Unlock Pro",
+    "subtitle": "Get unlimited access",
+    "features": ["Feature 1", "Feature 2"]
+  },
+  "disclaimer": "This logic is for informational purposes only."
+}

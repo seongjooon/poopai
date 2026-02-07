@@ -1,0 +1,262 @@
+import React from 'react';
+import {
+  View,
+  StyleSheet,
+  SafeAreaView,
+  ScrollView,
+  Linking,
+  TouchableOpacity,
+} from 'react-native';
+import { Button, Typography } from '@src/ui/atoms';
+import { PackageCard, BenefitList } from './components';
+import { usePaywall } from './usePaywall';
+import { spacing, colors } from '@config/theme';
+import contents from '@config/contents.json';
+
+interface PaywallScreenProps {
+  onClose?: () => void;
+}
+
+export const PaywallScreen = ({ onClose }: PaywallScreenProps) => {
+  const {
+    packages,
+    selectedPackageId,
+    isPurchasing,
+    errorMessage,
+    selectPackage,
+    handlePurchase,
+    handleRestore,
+  } = usePaywall(onClose);
+
+  const paywallContent = contents.paywall;
+  const selectedPackage = packages.find((pkg) => pkg.id === selectedPackageId);
+
+  const openLink = (url: string) => {
+    Linking.openURL(url).catch(() => {
+      console.error('Failed to open URL:', url);
+    });
+  };
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        {/* Header */}
+        <View style={styles.header}>
+          {/* Close Button */}
+          {onClose && (
+            <TouchableOpacity
+              onPress={onClose}
+              style={styles.closeButton}
+            >
+              <Typography color={colors.primary}>✕</Typography>
+            </TouchableOpacity>
+          )}
+
+          {/* Header Image Placeholder */}
+          <View style={styles.headerImage} />
+
+          {/* Title */}
+          <Typography
+            variant="h1"
+            style={styles.title}
+          >
+            {paywallContent.title}
+          </Typography>
+
+          {/* Subtitle */}
+          <Typography
+            variant="body"
+            style={styles.subtitle}
+          >
+            {paywallContent.subtitle}
+          </Typography>
+        </View>
+
+        {/* Benefits Section */}
+        <View style={styles.benefitsSection}>
+          <BenefitList benefits={paywallContent.features} />
+        </View>
+
+        {/* Packages Section */}
+        <View style={styles.packagesSection}>
+          {packages.map((pkg) => (
+            <PackageCard
+              key={pkg.id}
+              package={pkg}
+              isSelected={pkg.id === selectedPackageId}
+              isLoading={isPurchasing}
+              onSelect={(p) => selectPackage(p.id)}
+            />
+          ))}
+        </View>
+
+        {/* Error Message */}
+        {errorMessage && (
+          <View style={styles.errorContainer}>
+            <Typography color={colors.error}>{errorMessage}</Typography>
+          </View>
+        )}
+      </ScrollView>
+
+      {/* Footer - Fixed at bottom */}
+      <View style={styles.footer}>
+        {/* Subscribe Button */}
+        <Button
+          title={
+            selectedPackage
+              ? `Subscribe to ${selectedPackage.name}`
+              : 'Select a Plan'
+          }
+          onPress={handlePurchase}
+          disabled={isPurchasing || !selectedPackage}
+          loading={isPurchasing}
+          style={styles.subscribeButton}
+        />
+
+        {/* Restore Purchases */}
+        <TouchableOpacity
+          onPress={handleRestore}
+          disabled={isPurchasing}
+          style={styles.restoreButton}
+        >
+          <Typography
+            variant="caption"
+            color={colors.primary}
+            style={styles.restoreText}
+          >
+            Restore Purchases
+          </Typography>
+        </TouchableOpacity>
+
+        {/* Terms and Privacy */}
+        <View style={styles.termsContainer}>
+          <TouchableOpacity
+            onPress={() =>
+              openLink('https://example.com/privacy-policy')
+            }
+          >
+            <Typography
+              variant="caption"
+              color={colors.primary}
+              style={styles.link}
+            >
+              Privacy Policy
+            </Typography>
+          </TouchableOpacity>
+
+          <Typography variant="caption" style={styles.separator}>
+            •
+          </Typography>
+
+          <TouchableOpacity
+            onPress={() =>
+              openLink('https://example.com/terms-of-service')
+            }
+          >
+            <Typography
+              variant="caption"
+              color={colors.primary}
+              style={styles.link}
+            >
+              Terms of Service
+            </Typography>
+          </TouchableOpacity>
+        </View>
+
+        {/* Disclaimer */}
+        <Typography
+          variant="caption"
+          style={styles.disclaimer}
+        >
+          Auto-renewable subscription. Cancel anytime from App Store settings.
+        </Typography>
+      </View>
+    </SafeAreaView>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+  scrollContent: {
+    paddingHorizontal: spacing.l,
+    paddingTop: spacing.l,
+  },
+  header: {
+    alignItems: 'center',
+    marginBottom: spacing.xl,
+    position: 'relative',
+  },
+  closeButton: {
+    position: 'absolute',
+    top: -spacing.m,
+    right: -spacing.l,
+    padding: spacing.m,
+    zIndex: 10,
+  },
+  headerImage: {
+    width: '100%',
+    height: 200,
+    backgroundColor: '#F0F0F0',
+    borderRadius: 16,
+    marginBottom: spacing.l,
+  },
+  title: {
+    textAlign: 'center',
+    marginBottom: spacing.s,
+  },
+  subtitle: {
+    textAlign: 'center',
+    color: '#666666',
+  },
+  benefitsSection: {
+    marginBottom: spacing.l,
+  },
+  packagesSection: {
+    marginBottom: spacing.xl,
+  },
+  errorContainer: {
+    backgroundColor: '#FFEBEE',
+    paddingHorizontal: spacing.m,
+    paddingVertical: spacing.m,
+    borderRadius: 8,
+    marginBottom: spacing.m,
+  },
+  footer: {
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    paddingHorizontal: spacing.l,
+    paddingVertical: spacing.l,
+  },
+  subscribeButton: {
+    marginBottom: spacing.m,
+  },
+  restoreButton: {
+    paddingVertical: spacing.m,
+    alignItems: 'center',
+  },
+  restoreText: {
+    fontWeight: '600',
+    textDecorationLine: 'underline',
+  },
+  termsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginVertical: spacing.m,
+    gap: spacing.s,
+  },
+  link: {
+    fontWeight: '500',
+  },
+  separator: {
+    color: colors.border,
+  },
+  disclaimer: {
+    textAlign: 'center',
+    color: '#999999',
+    marginTop: spacing.m,
+  },
+});
