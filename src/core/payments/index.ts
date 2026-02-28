@@ -14,7 +14,11 @@ export const configurePayments = async () => {
       console.warn('[Payments] RevenueCat key is placeholder. Purchases will not work.');
       return;
     }
-    Purchases.configure({ apiKey: SECRETS.REVENUECAT_PUBLIC_KEY });
+    try {
+      Purchases.configure({ apiKey: SECRETS.REVENUECAT_PUBLIC_KEY });
+    } catch (error) {
+      console.warn("[Payments] Error configuring Purchases:", error);
+    }
   }
 };
 

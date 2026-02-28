@@ -1,19 +1,36 @@
-import { View } from 'react-native';
-import { Button } from '../ui/atoms';
-import { Typography } from '../ui/atoms';
-import { router } from 'expo-router';
+import { View, StyleSheet } from 'react-native';
+import { useRouter } from 'expo-router';
+import { Typography, Button } from '../ui/atoms';
+import { colors, spacing } from '@config/theme';
 
-export default function Index() {
+export default function MainScreen() {
+  const router = useRouter();
+
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', gap: 20 }}>
-      <Typography variant="h1">App Factory Ready 🏭</Typography>
-      <Typography variant="body">Architecture: Vertical Slice + Facades</Typography>
+    <View style={styles.container}>
+      <Typography variant="h1">PoopAI</Typography>
+      <Typography variant="body" color="#666" style={styles.subtitle}>
+        Your gut health companion 💩
+      </Typography>
 
       <Button
-        title="Start Onboarding (Mock)"
-        onPress={() => console.log('Navigate to onboarding')}
-        variant="primary"
+        title="⚙️ Settings"
+        onPress={() => router.push('/settings')}
       />
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: spacing.l,
+    gap: spacing.m,
+  },
+  subtitle: {
+    marginBottom: spacing.xl,
+  },
+});

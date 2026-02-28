@@ -1,19 +1,80 @@
-import { Slot } from 'expo-router';
-import { View, StyleSheet } from 'react-native';
+import { useEffect, useState } from 'react';
+import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAuth } from '../core/auth';
+import { usePayments, configurePayments } from '../core/payments';
+import { Analytics } from '../core/analytics';
+import Constants from 'expo-constants';
+
+// In Expo Go, RevenueCat native store is unavailable — skip paywall gate
+const isExpoGo = Constants.appOwnership === 'expo';
 
 export default function RootLayout() {
+  const router = useRouter();
+  const segments = useSegments();
+  const user = useAuth((s) => s.user);
+  const isAuthInitialized = useAuth((s) => s.isInitialized);
+  const isPro = usePayments((s) => s.isPro);
+  const [isReady, setIsReady] = useState(false);
+  const [onboardingDone, setOnboardingDone] = useState(false);
+
+  // Initialize core services once
+  useEffect(() => {
+    useAuth.getState().initialize();
+    configurePayments().catch((e) =>
+      console.warn('[Layout] configurePayments failed:', e)
+    );
+    Analytics.initialize();
+
+    AsyncStorage.getItem('onboarding_completed').then((val) => {
+      setOnboardingDone(!!val);
+      setIsReady(true);
+    });
+  }, []);
+
+  // Route guard
+  useEffect(() => {
+    if (!isReady || !isAuthInitialized) return;
+
+    const inOnboarding = segments[0] === 'onboarding';
+    const inLogin = segments[0] === 'login';
+    const inPaywall = segments[0] === 'paywall';
+
+    // 1. Onboarding not done → onboarding
+    if (!onboardingDone) {
+      if (!inOnboarding) router.replace('/onboarding');
+      return;
+    }
+
+    // 2. Not logged in → login
+    if (!user) {
+      if (!inLogin) router.replace('/login');
+      return;
+    }
+
+    // 3. Not Pro → paywall (skip in Expo Go since RevenueCat doesn't work)
+    if (!isPro && !isExpoGo) {
+      if (!inPaywall) router.replace('/paywall');
+      return;
+    }
+
+    // 4. All good → main
+    if (inOnboarding || inLogin || inPaywall) {
+      router.replace('/');
+    }
+  }, [isReady, isAuthInitialized, user, isPro, onboardingDone, segments]);
+
   return (
-    <View style={styles.container}>
+    <>
       <StatusBar style="auto" />
-      <Slot />
-    </View>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="index" />
+        <Stack.Screen name="onboarding" />
+        <Stack.Screen name="login" />
+        <Stack.Screen name="paywall" />
+        <Stack.Screen name="settings" />
+      </Stack>
+    </>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-});
