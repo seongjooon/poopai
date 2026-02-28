@@ -15,7 +15,7 @@ interface LoginScreenProps {
 }
 
 export const LoginScreen = ({ onComplete }: LoginScreenProps) => {
-  const { signInWithApple, signInWithGoogle, signInAnonymously } = useAuth();
+  const { signInWithApple, signInWithGoogle } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSignIn = async (method: () => Promise<void>) => {
@@ -64,13 +64,6 @@ export const LoginScreen = ({ onComplete }: LoginScreenProps) => {
               loading={isLoading}
             />
           )}
-
-          <Button
-            title="Continue as Guest"
-            onPress={() => handleSignIn(signInAnonymously)}
-            variant="outline"
-            loading={isLoading}
-          />
         </View>
       </View>
     </SafeAreaView>
