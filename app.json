@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "YOUR_APP_NAME",
-    "slug": "your-app-slug",
+    "name": "PoopAI",
+    "slug": "poopai",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -15,15 +15,15 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.yourcompany.yourapp"
+      "supportsTablet": false,
+      "bundleIdentifier": "com.poopai.app"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.yourcompany.yourapp"
+      "package": "com.poopai.app"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -33,6 +33,6 @@
       "expo-apple-authentication",
       "@react-native-google-signin/google-signin"
     ],
-    "scheme": "yourapp"
+    "scheme": "poopai"
   }
 }
