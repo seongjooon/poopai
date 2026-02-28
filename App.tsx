@@ -7,7 +7,7 @@ import { LoginScreen } from './src/features/login';
 import { PaywallScreen } from './src/features/paywall';
 import { SettingsScreen } from './src/features/settings';
 import { useAuth } from './src/core/auth';
-import { configurePayments } from './src/core/payments';
+import { usePayments, configurePayments } from './src/core/payments';
 import { Analytics } from './src/core/analytics';
 import { ErrorBoundary } from './src/core/error/ErrorBoundary';
 
@@ -23,35 +23,59 @@ export default function App() {
 
 function AppContent() {
   const [appState, setAppState] = useState<AppState>('loading');
+  const user = useAuth((s) => s.user);
+  const isAuthInitialized = useAuth((s) => s.isInitialized);
+  const isPro = usePayments((s) => s.isPro);
 
   useEffect(() => {
     // Initialize core services
     useAuth.getState().initialize();
     configurePayments();
     Analytics.initialize();
-
-    const checkOnboardingStatus = async () => {
-      try {
-        const isCompleted = await AsyncStorage.getItem('onboarding_completed');
-        setAppState(isCompleted ? 'main' : 'onboarding');
-      } catch (error) {
-        console.error('Error checking onboarding status:', error);
-        setAppState('onboarding');
-      }
-    };
-
-    checkOnboardingStatus();
   }, []);
 
-  const handleNavigateToLogin = () => {
+  // Main routing logic — runs when auth/payment state changes
+  useEffect(() => {
+    if (!isAuthInitialized) return;
+
+    const resolveAppState = async () => {
+      // 1. Not logged in → check onboarding
+      if (!user) {
+        const onboardingDone = await AsyncStorage.getItem('onboarding_completed');
+        setAppState(onboardingDone ? 'login' : 'onboarding');
+        return;
+      }
+
+      // 2. Logged in but not Pro → paywall (hard gate)
+      if (!isPro) {
+        // Initialize payments to check subscription status
+        await usePayments.getState().initialize();
+        const currentIsPro = usePayments.getState().isPro;
+        if (!currentIsPro) {
+          setAppState('paywall');
+          return;
+        }
+      }
+
+      // 3. Logged in + Pro → main
+      setAppState('main');
+    };
+
+    resolveAppState();
+  }, [user, isPro, isAuthInitialized]);
+
+  const handleOnboardingComplete = () => {
     setAppState('login');
   };
 
-  const handleNavigateToPaywall = () => {
-    setAppState('paywall');
+  const handleLoginComplete = async () => {
+    // After login, check pro status
+    await usePayments.getState().initialize();
+    const currentIsPro = usePayments.getState().isPro;
+    setAppState(currentIsPro ? 'main' : 'paywall');
   };
 
-  const handleNavigateToMain = () => {
+  const handlePaywallComplete = () => {
     setAppState('main');
   };
 
@@ -76,8 +100,8 @@ function AppContent() {
     return (
       <>
         <OnboardingScreen
-          onNavigateToPaywall={handleNavigateToLogin}
-          onNavigateToMain={handleNavigateToLogin}
+          onNavigateToPaywall={handleOnboardingComplete}
+          onNavigateToMain={handleOnboardingComplete}
         />
         <StatusBar style="auto" />
       </>
@@ -87,7 +111,7 @@ function AppContent() {
   if (appState === 'login') {
     return (
       <>
-        <LoginScreen onComplete={handleNavigateToPaywall} />
+        <LoginScreen onComplete={handleLoginComplete} />
         <StatusBar style="auto" />
       </>
     );
@@ -96,7 +120,7 @@ function AppContent() {
   if (appState === 'paywall') {
     return (
       <>
-        <PaywallScreen onClose={handleNavigateToMain} />
+        <PaywallScreen onClose={handlePaywallComplete} isHardPaywall={true} />
         <StatusBar style="auto" />
       </>
     );
@@ -113,21 +137,14 @@ function AppContent() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.mainTitle}>Main App Screen</Text>
-      <Text style={styles.subtitle}>Onboarding completed! 🎉</Text>
+      <Text style={styles.mainTitle}>PoopAI</Text>
+      <Text style={styles.subtitle}>Your gut health companion 💩</Text>
 
       <TouchableOpacity
         onPress={handleNavigateToSettings}
         style={styles.settingsButton}
       >
         <Text style={styles.settingsButtonText}>⚙️ Settings</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        onPress={handleNavigateToPaywall}
-        style={styles.paywallButton}
-      >
-        <Text style={styles.paywallButtonText}>💳 View Paywall</Text>
       </TouchableOpacity>
 
       <StatusBar style="auto" />
@@ -164,19 +181,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   settingsButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  paywallButton: {
-    backgroundColor: '#34C759',
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 8,
-    minWidth: 200,
-    alignItems: 'center',
-  },
-  paywallButtonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',

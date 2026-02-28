@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { Platform } from 'react-native';
 import { supabase } from '@src/lib/supabase';
 import * as AppleAuthentication from 'expo-apple-authentication';
+import Purchases from 'react-native-purchases';
 import { SECRETS } from '@config/secrets';
 
 // Dynamically load Google Sign-In only on Android to avoid
@@ -24,6 +25,7 @@ export type User = {
 interface AuthState {
   user: User | null;
   isLoading: boolean;
+  isInitialized: boolean;
   initialize: () => void;
   signInWithApple: () => Promise<void>;
   signInWithGoogle: () => Promise<void>;
@@ -41,17 +43,41 @@ const mapUser = (supabaseUser: any): User | null => {
   };
 };
 
-export const useAuth = create<AuthState>((set) => ({
+/**
+ * Sync RevenueCat subscriber identity with Supabase user ID.
+ * This ensures subscription data follows the user across devices.
+ */
+const syncRevenueCatUser = async (userId: string | null) => {
+  if (!userId) return;
+  if (SECRETS.REVENUECAT_PUBLIC_KEY === 'appl_PlaceholderKey') return;
+
+  try {
+    await Purchases.logIn(userId);
+  } catch (error) {
+    console.warn('[Auth] RevenueCat logIn failed:', error);
+  }
+};
+
+export const useAuth = create<AuthState>((set, get) => ({
   user: null,
   isLoading: true,
+  isInitialized: false,
 
   initialize: () => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      set({ user: mapUser(session?.user ?? null), isLoading: false });
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      const user = mapUser(session?.user ?? null);
+      if (user) {
+        await syncRevenueCatUser(user.id);
+      }
+      set({ user, isLoading: false, isInitialized: true });
     });
 
-    supabase.auth.onAuthStateChange((_event, session) => {
-      set({ user: mapUser(session?.user ?? null) });
+    supabase.auth.onAuthStateChange(async (_event, session) => {
+      const user = mapUser(session?.user ?? null);
+      if (user) {
+        await syncRevenueCatUser(user.id);
+      }
+      set({ user });
     });
   },
 
@@ -103,6 +129,12 @@ export const useAuth = create<AuthState>((set) => ({
   signOut: async () => {
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
+    // Reset RevenueCat to anonymous user
+    try {
+      await Purchases.logOut();
+    } catch (e) {
+      // logOut throws if already anonymous, safe to ignore
+    }
   },
 
   deleteAccount: async () => {

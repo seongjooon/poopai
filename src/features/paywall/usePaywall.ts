@@ -24,9 +24,9 @@ const MOCK_PACKAGES: MockPackage[] = [
   {
     id: 'annual',
     name: 'Annual',
-    price: '$79.99',
+    price: '$59.99',
     period: 'per year',
-    savings: 'Save 33%',
+    savings: 'Save 50%',
     isPopular: true,
   },
 ];
@@ -36,11 +36,24 @@ export const usePaywall = (onComplete?: () => void) => {
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [selectedPackageId, setSelectedPackageId] = useState<string>('annual');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [trialEligible, setTrialEligible] = useState(true);
 
   // Initialize payments on mount
   useEffect(() => {
     initialize();
   }, [initialize]);
+
+  // Check trial eligibility from RevenueCat intro pricing
+  useEffect(() => {
+    const rcPackages = offerings?.current?.availablePackages ?? [];
+    if (rcPackages.length > 0) {
+      // If any package has intro pricing (free trial), user is eligible
+      const hasIntro = rcPackages.some(
+        (pkg) => pkg.product.introPrice !== null && pkg.product.introPrice !== undefined
+      );
+      setTrialEligible(hasIntro);
+    }
+  }, [offerings]);
 
   // Get packages from RevenueCat or use mock
   const rcPackages = offerings?.current?.availablePackages ?? [];
@@ -71,7 +84,7 @@ export const usePaywall = (onComplete?: () => void) => {
 
     try {
       if (hasRealPackages && 'rcPackage' in pkg) {
-        // Real RevenueCat purchase
+        // Real RevenueCat purchase (trial is handled by the store automatically)
         await purchasePackage(pkg.rcPackage as PurchasesPackage);
       } else {
         // Mock purchase for development
@@ -115,6 +128,7 @@ export const usePaywall = (onComplete?: () => void) => {
     isPurchasing: isPurchasing || isLoading,
     errorMessage,
     isPro,
+    trialEligible,
     selectPackage,
     handlePurchase,
     handleRestore,

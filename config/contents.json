@@ -2,24 +2,31 @@
   "onboarding": [
     {
       "id": "welcome",
-      "title": "Welcome to App",
-      "subtitle": "The best app for your needs."
+      "title": "Welcome to PoopAI",
+      "subtitle": "Your gut health companion that takes the other end seriously."
     },
     {
       "id": "discover",
-      "title": "Discover Features",
-      "subtitle": "Powerful tools designed to make your life easier."
+      "title": "Snap & Analyze",
+      "subtitle": "Take a photo and let AI analyze your gut health instantly."
     },
     {
       "id": "get_started",
-      "title": "Ready to Go?",
-      "subtitle": "Start your journey now and unlock your potential."
+      "title": "Track Your Health",
+      "subtitle": "Monitor patterns, get insights, and improve your digestive wellness."
     }
   ],
   "paywall": {
-    "title": "Unlock Pro",
-    "subtitle": "Get unlimited access",
-    "features": ["Feature 1", "Feature 2"]
+    "title": "Unlock PoopAI Pro",
+    "subtitle": "Start your 3-day free trial",
+    "features": [
+      "Unlimited AI gut health analysis",
+      "Detailed Bristol Scale reports",
+      "Weekly & monthly health trends",
+      "Personalized diet insights",
+      "Priority AI processing"
+    ],
+    "trialDays": 3
   },
-  "disclaimer": "This logic is for informational purposes only."
+  "disclaimer": "This app is for informational and wellness tracking purposes only. It is not a medical device and does not provide medical advice, diagnosis, or treatment."
 }
