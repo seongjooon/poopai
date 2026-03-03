@@ -1,15 +1,14 @@
 // @ts-nocheck
 // deno-lint-ignore-file no-explicit-any
 import { serve } from 'https://deno.land/std@0.224.0/http/server.ts';
-import OpenAI from 'https://esm.sh/openai@4.56.0';
 
-const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
+const geminiApiKey = Deno.env.get('GEMINI_API_KEY');
 
-if (!openaiApiKey) {
-  console.warn('[analyze-poop] OPENAI_API_KEY is not set');
+if (!geminiApiKey) {
+  console.warn('[analyze-poop] GEMINI_API_KEY is not set');
 }
 
-const openai = new OpenAI({ apiKey: openaiApiKey });
+const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiApiKey}`;
 
 const allowedColors = new Set(['brown', 'green', 'black', 'red', 'yellow', 'pale']);
 const allowedColorStatus = new Set(['normal', 'attention', 'warning']);
@@ -47,7 +46,6 @@ function validateAnalysisResult(data: any) {
 function applySafetyOverrides(data: any) {
   const result = { ...data };
 
-  // Hard safety rules agreed for MVP
   if (result.color === 'black') {
     result.warning = true;
     result.color_status = 'warning';
@@ -67,29 +65,8 @@ function applySafetyOverrides(data: any) {
   return result;
 }
 
-serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return jsonResponse(200, { ok: true });
-  }
-
-  if (req.method !== 'POST') {
-    return jsonResponse(405, { error: 'Method not allowed' });
-  }
-
-  if (!openaiApiKey) {
-    return jsonResponse(500, { error: 'Server is missing OPENAI_API_KEY' });
-  }
-
-  try {
-    const body = await req.json();
-    const imageBase64 = body?.imageBase64;
-
-    if (!imageBase64 || typeof imageBase64 !== 'string') {
-      return jsonResponse(400, { error: 'imageBase64 is required' });
-    }
-
-    const prompt = `You are a clinical gastroenterology vision assistant.
-Analyze this stool image and return STRICT JSON only.
+const prompt = `You are a clinical gastroenterology vision assistant.
+Analyze this stool image and return STRICT JSON only. No markdown, no code fences, just raw JSON.
 
 Clinical dimensions (based on validated stool-assessment criteria):
 1) Bristol Stool Scale (1-7)
@@ -104,7 +81,7 @@ Also output:
 - health_insight: one concise actionable sentence (non-diagnostic)
 - humor_comment: one respectful, light humorous sentence
 - warning: boolean
-- warning_detail: concise reason if warning=true
+- warning_detail: concise reason if warning=true, empty string if false
 
 Safety:
 - Do not diagnose disease.
@@ -112,7 +89,7 @@ Safety:
 
 Output JSON schema exactly:
 {
-  "bristol_type": 1,
+  "bristol_type": 4,
   "color": "brown",
   "color_status": "normal",
   "fragmentation": "mild",
@@ -125,66 +102,73 @@ Output JSON schema exactly:
   "warning_detail": ""
 }`;
 
-    const response = await openai.responses.create({
-      model: 'gpt-4o',
-      input: [
+serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return jsonResponse(200, { ok: true });
+  }
+
+  if (req.method !== 'POST') {
+    return jsonResponse(405, { error: 'Method not allowed' });
+  }
+
+  if (!geminiApiKey) {
+    return jsonResponse(500, { error: 'Server is missing GEMINI_API_KEY' });
+  }
+
+  try {
+    const body = await req.json();
+    const imageBase64 = body?.imageBase64;
+
+    if (!imageBase64 || typeof imageBase64 !== 'string') {
+      return jsonResponse(400, { error: 'imageBase64 is required' });
+    }
+
+    const geminiBody = {
+      contents: [
         {
-          role: 'user',
-          content: [
-            { type: 'input_text', text: prompt },
+          parts: [
+            { text: prompt },
             {
-              type: 'input_image',
-              image_url: `data:image/jpeg;base64,${imageBase64}`,
-              detail: 'high',
+              inline_data: {
+                mime_type: 'image/jpeg',
+                data: imageBase64,
+              },
             },
           ],
         },
       ],
-      text: {
-        format: {
-          type: 'json_schema',
-          name: 'poop_analysis_result',
-          schema: {
-            type: 'object',
-            additionalProperties: false,
-            properties: {
-              bristol_type: { type: 'integer', minimum: 1, maximum: 7 },
-              color: { type: 'string', enum: ['brown', 'green', 'black', 'red', 'yellow', 'pale'] },
-              color_status: { type: 'string', enum: ['normal', 'attention', 'warning'] },
-              fragmentation: { type: 'string', enum: ['none', 'mild', 'moderate', 'severe'] },
-              edge_fuzziness: { type: 'string', enum: ['sharp', 'moderate', 'fuzzy'] },
-              volume: { type: 'string', enum: ['small', 'medium', 'large'] },
-              gut_score: { type: 'integer', minimum: 0, maximum: 100 },
-              health_insight: { type: 'string', minLength: 1, maxLength: 240 },
-              humor_comment: { type: 'string', minLength: 1, maxLength: 240 },
-              warning: { type: 'boolean' },
-              warning_detail: { type: 'string', maxLength: 240 },
-            },
-            required: [
-              'bristol_type',
-              'color',
-              'color_status',
-              'fragmentation',
-              'edge_fuzziness',
-              'volume',
-              'gut_score',
-              'health_insight',
-              'humor_comment',
-              'warning',
-              'warning_detail',
-            ],
-          },
-          strict: true,
-        },
+      generationConfig: {
+        responseMimeType: 'application/json',
+        temperature: 0.2,
       },
+    };
+
+    const res = await fetch(GEMINI_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(geminiBody),
     });
 
-    const outputText = response.output_text;
-    const parsed = JSON.parse(outputText);
+    if (!res.ok) {
+      const errText = await res.text();
+      console.error('[analyze-poop] Gemini API error', res.status, errText);
+      return jsonResponse(502, {
+        error: 'Gemini API error',
+        detail: `${res.status}: ${errText.slice(0, 200)}`,
+      });
+    }
+
+    const geminiRes = await res.json();
+    const outputText = geminiRes?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+
+    // Strip markdown fences if present
+    const cleaned = outputText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+    const parsed = JSON.parse(cleaned);
 
     if (!validateAnalysisResult(parsed)) {
       return jsonResponse(502, {
         error: 'Model output validation failed',
+        detail: JSON.stringify(parsed).slice(0, 300),
       });
     }
 
@@ -192,9 +176,11 @@ Output JSON schema exactly:
 
     return jsonResponse(200, safeResult);
   } catch (error) {
-    console.error('[analyze-poop] error', error);
+    const errMsg = error instanceof Error ? error.message : String(error);
+    console.error('[analyze-poop] error', errMsg);
     return jsonResponse(500, {
       error: 'Failed to analyze image',
+      detail: errMsg,
     });
   }
 });
