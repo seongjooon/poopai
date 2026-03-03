@@ -44,6 +44,29 @@ function validateAnalysisResult(data: any) {
   return true;
 }
 
+function applySafetyOverrides(data: any) {
+  const result = { ...data };
+
+  // Hard safety rules agreed for MVP
+  if (result.color === 'black') {
+    result.warning = true;
+    result.color_status = 'warning';
+    result.warning_detail =
+      result.warning_detail ||
+      'Black stool can be a warning sign. Consider prompt medical evaluation.';
+  }
+
+  if (result.color === 'red') {
+    result.warning = true;
+    result.color_status = 'warning';
+    result.warning_detail =
+      result.warning_detail ||
+      'Red stool can indicate possible bleeding. Consider prompt medical evaluation.';
+  }
+
+  return result;
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return jsonResponse(200, { ok: true });
@@ -165,7 +188,9 @@ Output JSON schema exactly:
       });
     }
 
-    return jsonResponse(200, parsed);
+    const safeResult = applySafetyOverrides(parsed);
+
+    return jsonResponse(200, safeResult);
   } catch (error) {
     console.error('[analyze-poop] error', error);
     return jsonResponse(500, {
