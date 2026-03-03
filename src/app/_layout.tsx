@@ -37,32 +37,48 @@ export default function RootLayout() {
   useEffect(() => {
     if (!isReady || !isAuthInitialized) return;
 
-    const inOnboarding = segments[0] === 'onboarding';
-    const inLogin = segments[0] === 'login';
-    const inPaywall = segments[0] === 'paywall';
+    let isCancelled = false;
 
-    // 1. Onboarding not done → onboarding
-    if (!onboardingDone) {
-      if (!inOnboarding) router.replace('/onboarding');
-      return;
-    }
+    const runGuard = async () => {
+      const inOnboarding = segments[0] === 'onboarding';
+      const inLogin = segments[0] === 'login';
+      const inPaywall = segments[0] === 'paywall';
 
-    // 2. Not logged in → login
-    if (!user) {
-      if (!inLogin) router.replace('/login');
-      return;
-    }
+      // Re-read latest onboarding flag to avoid stale state loops
+      const latestOnboardingDone = !!(await AsyncStorage.getItem('onboarding_completed'));
+      if (!isCancelled && latestOnboardingDone !== onboardingDone) {
+        setOnboardingDone(latestOnboardingDone);
+      }
 
-    // 3. Not Pro → paywall (skip in Expo Go since RevenueCat doesn't work)
-    if (!isPro && !isExpoGo) {
-      if (!inPaywall) router.replace('/paywall');
-      return;
-    }
+      // 1. Onboarding not done → onboarding
+      if (!latestOnboardingDone) {
+        if (!inOnboarding) router.replace('/onboarding');
+        return;
+      }
 
-    // 4. All good → main
-    if (inOnboarding || inLogin || inPaywall) {
-      router.replace('/');
-    }
+      // 2. Not logged in → login
+      if (!user) {
+        if (!inLogin) router.replace('/login');
+        return;
+      }
+
+      // 3. Not Pro → paywall (skip in Expo Go since RevenueCat doesn't work)
+      if (!isPro && !isExpoGo) {
+        if (!inPaywall) router.replace('/paywall');
+        return;
+      }
+
+      // 4. All good → main
+      if (inOnboarding || inLogin || inPaywall) {
+        router.replace('/');
+      }
+    };
+
+    runGuard();
+
+    return () => {
+      isCancelled = true;
+    };
   }, [isReady, isAuthInitialized, user, isPro, onboardingDone, segments]);
 
   return (
