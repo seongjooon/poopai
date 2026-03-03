@@ -14,6 +14,11 @@ export default function MainScreen() {
       </Typography>
 
       <Button
+        title="💩 Analyze Poop"
+        onPress={() => router.push('/poop-log')}
+      />
+
+      <Button
         title="⚙️ Settings"
         onPress={() => router.push('/settings')}
       />

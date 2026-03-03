@@ -73,6 +73,7 @@ export default function RootLayout() {
         <Stack.Screen name="onboarding" />
         <Stack.Screen name="login" />
         <Stack.Screen name="paywall" />
+        <Stack.Screen name="poop-log" />
         <Stack.Screen name="settings" />
       </Stack>
     </>
