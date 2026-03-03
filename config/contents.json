@@ -2,18 +2,53 @@
   "onboarding": [
     {
       "id": "welcome",
+      "kind": "intro",
       "title": "Welcome to PoopAI",
-      "subtitle": "Your gut health companion that takes the other end seriously."
+      "subtitle": "Eat smart, poop smarter. We turn your daily output into useful gut insights."
     },
     {
-      "id": "discover",
-      "title": "Snap & Analyze",
-      "subtitle": "Take a photo and let AI analyze your gut health instantly."
+      "id": "goal",
+      "kind": "single_select",
+      "required": true,
+      "title": "What are you here for?",
+      "subtitle": "Pick your main goal so we can personalize your experience.",
+      "options": [
+        { "id": "improve_gut", "label": "Improve my gut health" },
+        { "id": "find_triggers", "label": "Find food/symptom triggers" },
+        { "id": "track_fun", "label": "Track daily & have fun" }
+      ]
     },
     {
-      "id": "get_started",
-      "title": "Track Your Health",
-      "subtitle": "Monitor patterns, get insights, and improve your digestive wellness."
+      "id": "acquisition",
+      "kind": "single_select",
+      "title": "How did you hear about us?",
+      "subtitle": "This helps us focus on channels users actually like.",
+      "options": [
+        { "id": "tiktok", "label": "TikTok" },
+        { "id": "instagram", "label": "Instagram" },
+        { "id": "threads_x", "label": "Threads / X" },
+        { "id": "friend", "label": "Friend" },
+        { "id": "app_store", "label": "App Store Search" },
+        { "id": "other", "label": "Other" }
+      ]
+    },
+    {
+      "id": "frequency",
+      "kind": "single_select",
+      "required": true,
+      "title": "How often do gut issues bother you?",
+      "subtitle": "No judgment. This helps us tune your baseline insights.",
+      "options": [
+        { "id": "rarely", "label": "Rarely" },
+        { "id": "sometimes", "label": "Sometimes" },
+        { "id": "often", "label": "Often" }
+      ]
+    },
+    {
+      "id": "ready",
+      "kind": "finish",
+      "title": "You’re all set",
+      "subtitle": "Your profile is ready. Tap continue and start your first PoopAI scan."
     }
   ],
   "paywall": {

@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, SafeAreaView } from 'react-native';
-import { Button, Typography } from '@src/ui/atoms';
+import { Button } from '@src/ui/atoms';
 import { Slide, DotIndicator } from './components';
 import { useOnboarding } from './useOnboarding';
 import { spacing, colors } from '@config/theme';
@@ -14,13 +14,22 @@ export const OnboardingScreen = ({
   onNavigateToPaywall,
   onNavigateToMain,
 }: OnboardingScreenProps) => {
-  const { steps, currentStepIndex, currentStep, isLastStep, isLoading, handleNext, skipOnboarding } =
-    useOnboarding(onNavigateToPaywall, onNavigateToMain);
+  const {
+    steps,
+    currentStepIndex,
+    currentStep,
+    isLastStep,
+    isLoading,
+    canProceed,
+    currentSelection,
+    selectOption,
+    handleNext,
+    skipOnboarding,
+  } = useOnboarding(onNavigateToPaywall, onNavigateToMain);
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.topContainer}>
-        {/* Skip button (only show if not on last step) */}
         {!isLastStep && (
           <Button
             title="Skip"
@@ -32,22 +41,23 @@ export const OnboardingScreen = ({
         )}
       </View>
 
-      {/* Slide content */}
       <View style={styles.slideContainer}>
-        <Slide step={currentStep} />
+        <Slide
+          step={currentStep}
+          selectedOptionId={currentSelection}
+          onSelectOption={selectOption}
+        />
       </View>
 
-      {/* Dot indicator */}
       <View style={styles.indicatorContainer}>
         <DotIndicator totalSteps={steps.length} currentStepIndex={currentStepIndex} />
       </View>
 
-      {/* Bottom actions */}
       <View style={styles.bottomContainer}>
         <Button
-          title={isLastStep ? 'Get Started' : 'Next'}
+          title={isLastStep ? 'Start PoopAI' : 'Continue'}
           onPress={handleNext}
-          disabled={isLoading}
+          disabled={isLoading || !canProceed}
           loading={isLoading}
           style={styles.nextButton}
         />

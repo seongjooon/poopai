@@ -1,43 +1,71 @@
-import { useState, useCallback } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRemoteConfig } from '@src/core/remote-config';
 import contents from '@config/contents.json';
 import { OnboardingStepSchema } from './schema';
 
 const ONBOARDING_COMPLETED_KEY = 'onboarding_completed';
+const ONBOARDING_PROFILE_KEY = 'onboarding_profile';
 
-export const useOnboarding = (onNavigateToPaywall: () => void, onNavigateToMain: () => void) => {
+export const useOnboarding = (
+  onNavigateToPaywall: () => void,
+  onNavigateToMain: () => void
+) => {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [answers, setAnswers] = useState<Record<string, string>>({});
   const remoteConfig = useRemoteConfig();
 
-  // Validate and load onboarding steps from config
-  const steps = contents.onboarding.map((step) => OnboardingStepSchema.parse(step));
+  const steps = useMemo(
+    () => contents.onboarding.map((step) => OnboardingStepSchema.parse(step)),
+    []
+  );
 
+  const currentStep = steps[currentStepIndex];
   const isLastStep = currentStepIndex === steps.length - 1;
 
-  const handleNext = useCallback(async () => {
-    if (!isLastStep) {
-      // Move to next step
-      setCurrentStepIndex((prev) => prev + 1);
-    } else {
-      // Last step completed - check if paywall should be shown
-      setIsLoading(true);
-      try {
-        // Always mark onboarding as completed before navigating away
-        await AsyncStorage.setItem(ONBOARDING_COMPLETED_KEY, 'true');
+  const currentSelection = answers[currentStep.id];
+  const canProceed =
+    !currentStep.required ||
+    currentStep.kind !== 'single_select' ||
+    Boolean(currentSelection);
 
-        if (remoteConfig.showPaywallOnboarding) {
-          onNavigateToPaywall();
-        } else {
-          onNavigateToMain();
-        }
-      } catch (error) {
-        console.error('Error completing onboarding:', error);
-        setIsLoading(false);
-      }
+  const selectOption = useCallback((optionId: string) => {
+    setAnswers((prev) => ({ ...prev, [currentStep.id]: optionId }));
+  }, [currentStep.id]);
+
+  const handleNext = useCallback(async () => {
+    if (!canProceed) return;
+
+    if (!isLastStep) {
+      setCurrentStepIndex((prev) => prev + 1);
+      return;
     }
-  }, [isLastStep, remoteConfig.showPaywallOnboarding, onNavigateToPaywall, onNavigateToMain]);
+
+    setIsLoading(true);
+    try {
+      await AsyncStorage.multiSet([
+        [ONBOARDING_COMPLETED_KEY, 'true'],
+        [ONBOARDING_PROFILE_KEY, JSON.stringify(answers)],
+      ]);
+
+      if (remoteConfig.showPaywallOnboarding) {
+        onNavigateToPaywall();
+      } else {
+        onNavigateToMain();
+      }
+    } catch (error) {
+      console.error('Error completing onboarding:', error);
+      setIsLoading(false);
+    }
+  }, [
+    canProceed,
+    isLastStep,
+    answers,
+    remoteConfig.showPaywallOnboarding,
+    onNavigateToPaywall,
+    onNavigateToMain,
+  ]);
 
   const skipOnboarding = useCallback(async () => {
     setIsLoading(true);
@@ -53,9 +81,12 @@ export const useOnboarding = (onNavigateToPaywall: () => void, onNavigateToMain:
   return {
     steps,
     currentStepIndex,
-    currentStep: steps[currentStepIndex],
+    currentStep,
     isLastStep,
     isLoading,
+    canProceed,
+    currentSelection,
+    selectOption,
     handleNext,
     skipOnboarding,
   };
