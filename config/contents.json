@@ -45,12 +45,6 @@
       ]
     },
     {
-      "id": "privacy",
-      "kind": "intro",
-      "title": "Your privacy comes first",
-      "subtitle": "PoopAI is for wellness, not medical diagnosis. We only process what’s needed for analysis and keep your experience private by default."
-    },
-    {
       "id": "ready",
       "kind": "finish",
       "title": "You’re all set",
