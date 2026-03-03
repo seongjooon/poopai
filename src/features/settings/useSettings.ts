@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
 import { Alert, Linking } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '@src/core/auth';
 import { usePayments } from '@src/core/payments';
 import { useRemoteConfig } from '@src/core/remote-config';
@@ -92,6 +93,20 @@ export const useSettings = () => {
     });
   }, []);
 
+  const handleResetOnboarding = useCallback(async () => {
+    try {
+      await AsyncStorage.multiRemove([
+        'onboarding_completed',
+        'onboarding_profile',
+        'scan_intro_seen',
+      ]);
+      Alert.alert('Done', 'Onboarding and first-scan intro were reset.');
+    } catch (error) {
+      Alert.alert('Reset Failed', 'Could not reset onboarding state.');
+      console.error('Reset onboarding error:', error);
+    }
+  }, []);
+
   return {
     user,
     isPro,
@@ -100,6 +115,7 @@ export const useSettings = () => {
     handleSignOut,
     handleDeleteAccount,
     handleRestorePurchases,
+    handleResetOnboarding,
     openURL,
     sendEmail,
   };

@@ -30,6 +30,7 @@ export const SettingsScreen = ({ onClose }: SettingsScreenProps) => {
     handleRestorePurchases,
     openURL,
     sendEmail,
+    handleResetOnboarding,
   } = useSettings();
 
   const APP_VERSION = '1.0.0';
@@ -140,6 +141,16 @@ export const SettingsScreen = ({ onClose }: SettingsScreenProps) => {
           <SettingsItem
             label="Terms of Service"
             onPress={() => openURL('https://example.com/terms-of-service')}
+            style={styles.lastItem}
+          />
+        </SettingsSection>
+
+        {/* Developer Section */}
+        <SettingsSection title="Developer">
+          <SettingsItem
+            label="Reset Onboarding"
+            value="Show onboarding + first scan intro again"
+            onPress={handleResetOnboarding}
             style={styles.lastItem}
           />
         </SettingsSection>
