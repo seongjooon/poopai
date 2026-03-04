@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Alert } from 'react-native';
+import { useRouter } from 'expo-router';
 import { CameraScreen } from './CameraScreen';
 import { LoadingScreen } from './LoadingScreen';
 import { ResultCard } from './ResultCard';
@@ -10,6 +11,7 @@ import type { AnalysisResult } from './schema';
 type FlowStep = 'camera' | 'loading' | 'result';
 
 export function PoopLogScreen() {
+  const router = useRouter();
   const [step, setStep] = useState<FlowStep>('camera');
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const { analyze } = usePoopAnalysis();
@@ -50,7 +52,7 @@ export function PoopLogScreen() {
   }
 
   if (step === 'result' && result) {
-    return <ResultCard result={result} onRetake={resetFlow} />;
+    return <ResultCard result={result} onRetake={resetFlow} onDone={() => router.back()} />;
   }
 
   return <CameraScreen onCaptured={handleCaptured} />;

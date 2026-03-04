@@ -10,6 +10,7 @@ import {
   View,
 } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
+import { StatusBar } from 'expo-status-bar';
 import { useRouter } from 'expo-router';
 import { Button, Typography } from '@src/ui/atoms';
 import { Analytics } from '@src/core/analytics';
@@ -171,6 +172,7 @@ export function CameraScreen({ onCaptured }: CameraScreenProps) {
   /* ── Live camera ── */
   return (
     <SafeAreaView style={styles.container}>
+      <StatusBar style="light" />
       <CameraView
         style={StyleSheet.absoluteFill}
         facing="back"

@@ -9,6 +9,7 @@ import type { AnalysisResult } from './schema';
 interface ResultCardProps {
   result: AnalysisResult;
   onRetake: () => void;
+  onDone?: () => void;
 }
 
 function scoreColor(score: number) {
@@ -32,7 +33,7 @@ const METRIC_ICONS: Record<string, string> = {
   volume: '📏',
 };
 
-export function ResultCard({ result, onRetake }: ResultCardProps) {
+export function ResultCard({ result, onRetake, onDone }: ResultCardProps) {
   const cardRef = useRef<View>(null);
   const [isSharing, setIsSharing] = useState(false);
 
@@ -158,18 +159,27 @@ export function ResultCard({ result, onRetake }: ResultCardProps) {
       {/* ── Actions ── */}
       <View style={styles.actions}>
         <Button
-          title="↩ Retake"
+          title="Retake"
           variant="outline"
           onPress={onRetake}
           style={styles.actionButton}
         />
         <Button
-          title={isSharing ? 'Sharing...' : '📤 Share'}
+          title={isSharing ? 'Sharing...' : 'Share'}
+          variant="outline"
           onPress={shareResult}
           loading={isSharing}
-          style={[styles.actionButton, styles.shareButton]}
+          style={styles.actionButton}
         />
       </View>
+
+      {onDone && (
+        <Button
+          title="Done"
+          onPress={onDone}
+          style={styles.doneButton}
+        />
+      )}
     </ScrollView>
   );
 }
@@ -346,7 +356,7 @@ const styles = StyleSheet.create({
   actionButton: {
     flex: 1,
   },
-  shareButton: {
+  doneButton: {
     backgroundColor: '#0D3DFF',
   },
 });

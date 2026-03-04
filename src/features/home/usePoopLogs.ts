@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
+import { useFocusEffect } from 'expo-router';
 import { supabase } from '@src/lib/supabase';
 
 export interface PoopLog {
@@ -43,9 +44,12 @@ export function usePoopLogs() {
     }
   }, []);
 
-  useEffect(() => {
-    fetchLogs();
-  }, [fetchLogs]);
+  // Refetch whenever the screen comes into focus (e.g., returning from scan)
+  useFocusEffect(
+    useCallback(() => {
+      fetchLogs();
+    }, [fetchLogs])
+  );
 
   return { logs, isLoading, refetch: fetchLogs };
 }

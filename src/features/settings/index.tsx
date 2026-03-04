@@ -3,7 +3,6 @@ import React from 'react';
 import {
   View,
   StyleSheet,
-
   ScrollView,
   Alert,
   TouchableOpacity,
@@ -42,15 +41,18 @@ export const SettingsScreen = ({ onClose }: SettingsScreenProps) => {
       <ScrollView>
         {/* Header */}
         <View style={styles.header}>
+          {onClose && (
+            <View style={styles.handleBar} />
+          )}
           <View style={styles.headerRow}>
-            {onClose && (
-              <TouchableOpacity onPress={onClose} style={styles.backButton}>
-                <Typography color={colors.primary}>← Back</Typography>
-              </TouchableOpacity>
-            )}
             <Typography variant="h1" style={styles.title}>
               Settings
             </Typography>
+            {onClose && (
+              <TouchableOpacity onPress={onClose} style={styles.doneButton}>
+                <Typography color={colors.primary} style={styles.doneText}>Done</Typography>
+              </TouchableOpacity>
+            )}
           </View>
         </View>
 
@@ -162,21 +164,36 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: spacing.l,
-    paddingVertical: spacing.l,
+    paddingTop: spacing.m,
+    paddingBottom: spacing.m,
     backgroundColor: colors.background,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#E5E5EA',
+  },
+  handleBar: {
+    width: 36,
+    height: 5,
+    borderRadius: 3,
+    backgroundColor: '#D1D1D6',
+    alignSelf: 'center',
+    marginBottom: 12,
   },
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
-  },
-  backButton: {
-    marginRight: spacing.m,
-    paddingVertical: spacing.s,
+    justifyContent: 'space-between',
   },
   title: {
-    marginBottom: spacing.s,
+    marginBottom: 0,
+    fontSize: 28,
+  },
+  doneButton: {
+    paddingVertical: spacing.s,
+    paddingHorizontal: 4,
+  },
+  doneText: {
+    fontSize: 17,
+    fontWeight: '600',
   },
   proPromoBanner: {
     backgroundColor: colors.primary,

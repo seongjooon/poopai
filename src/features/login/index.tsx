@@ -1,15 +1,8 @@
 import { SafeAreaView } from 'react-native-safe-area-context';
 import React, { useState } from 'react';
-import {
-  View,
-  StyleSheet,
-
-  Platform,
-  Alert,
-} from 'react-native';
+import { View, StyleSheet, Platform, Alert } from 'react-native';
 import { Typography, Button } from '@src/ui/atoms';
 import { useAuth } from '@src/core/auth';
-import { colors, spacing } from '@config/theme';
 
 interface LoginScreenProps {
   onComplete: () => void;
@@ -39,16 +32,19 @@ export const LoginScreen = ({ onComplete }: LoginScreenProps) => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
-        <View style={styles.header}>
+        {/* Hero */}
+        <View style={styles.hero}>
+          <Typography style={styles.icon}>💩</Typography>
           <Typography variant="h1" style={styles.title}>
-            Welcome
+            PoopAI
           </Typography>
-          <Typography variant="body" color="#8E8E93">
-            Sign in to get started
+          <Typography variant="body" color="#8E8E93" style={styles.subtitle}>
+            Your gut health companion
           </Typography>
         </View>
 
-        <View style={styles.buttons}>
+        {/* Sign in */}
+        <View style={styles.bottom}>
           {Platform.OS === 'ios' && (
             <Button
               title="Continue with Apple"
@@ -65,6 +61,10 @@ export const LoginScreen = ({ onComplete }: LoginScreenProps) => {
               loading={isLoading}
             />
           )}
+
+          <Typography variant="caption" color="#C7C7CC" style={styles.legal}>
+            By continuing, you agree to our Terms of Service and Privacy Policy.
+          </Typography>
         </View>
       </View>
     </SafeAreaView>
@@ -74,24 +74,44 @@ export const LoginScreen = ({ onComplete }: LoginScreenProps) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: '#FFFFFF',
   },
   content: {
     flex: 1,
-    justifyContent: 'center',
-    paddingHorizontal: spacing.l,
+    justifyContent: 'space-between',
+    paddingHorizontal: 24,
+    paddingBottom: 24,
   },
-  header: {
+  hero: {
+    flex: 1,
     alignItems: 'center',
-    marginBottom: spacing.xl,
+    justifyContent: 'center',
+  },
+  icon: {
+    fontSize: 72,
+    marginBottom: 16,
   },
   title: {
-    marginBottom: spacing.s,
+    color: '#000000',
+    fontSize: 34,
+    fontWeight: '700',
+    marginBottom: 6,
   },
-  buttons: {
-    gap: spacing.m,
+  subtitle: {
+    fontSize: 17,
+    lineHeight: 22,
+  },
+  bottom: {
+    gap: 16,
   },
   appleButton: {
     backgroundColor: '#000000',
+    borderRadius: 14,
+    paddingVertical: 18,
+  },
+  legal: {
+    textAlign: 'center',
+    lineHeight: 16,
+    paddingHorizontal: 20,
   },
 });

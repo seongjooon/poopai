@@ -84,14 +84,14 @@ export default function RootLayout() {
   return (
     <>
       <StatusBar style="auto" />
-      <Stack screenOptions={{ headerShown: false }}>
+      <Stack screenOptions={{ headerShown: false, animation: 'default' }}>
         <Stack.Screen name="index" />
-        <Stack.Screen name="onboarding" />
-        <Stack.Screen name="login" />
-        <Stack.Screen name="paywall" />
-        <Stack.Screen name="scan-intro" />
-        <Stack.Screen name="poop-log" />
-        <Stack.Screen name="settings" />
+        <Stack.Screen name="onboarding" options={{ animation: 'fade' }} />
+        <Stack.Screen name="login" options={{ animation: 'fade' }} />
+        <Stack.Screen name="paywall" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="scan-intro" options={{ animation: 'slide_from_bottom' }} />
+        <Stack.Screen name="poop-log" options={{ animation: 'slide_from_bottom', gestureEnabled: false }} />
+        <Stack.Screen name="settings" options={{ presentation: 'modal' }} />
       </Stack>
     </>
   );
