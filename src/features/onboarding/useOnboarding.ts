@@ -1,6 +1,7 @@
-import { useMemo, useState, useCallback } from 'react';
+import { useMemo, useState, useCallback, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRemoteConfig } from '@src/core/remote-config';
+import { Analytics } from '@src/core/analytics';
 import contents from '@config/contents.json';
 import { OnboardingStepSchema } from './schema';
 
@@ -23,6 +24,14 @@ export const useOnboarding = (
 
   const currentStep = steps[currentStepIndex];
   const isLastStep = currentStepIndex === steps.length - 1;
+
+  // Track onboarding start & step views
+  useEffect(() => {
+    if (currentStepIndex === 0) {
+      Analytics.trackOnboardingStarted();
+    }
+    Analytics.trackOnboardingStepViewed(currentStepIndex, currentStep.id);
+  }, [currentStepIndex, currentStep.id]);
 
   const currentSelection = answers[currentStep.id];
   const canProceed =
@@ -49,6 +58,8 @@ export const useOnboarding = (
         [ONBOARDING_PROFILE_KEY, JSON.stringify(answers)],
       ]);
 
+      Analytics.trackOnboardingCompleted(answers);
+
       if (remoteConfig.showPaywallOnboarding) {
         onNavigateToPaywall();
       } else {
@@ -70,6 +81,7 @@ export const useOnboarding = (
   const skipOnboarding = useCallback(async () => {
     setIsLoading(true);
     try {
+      Analytics.trackOnboardingSkipped(currentStepIndex);
       await AsyncStorage.setItem(ONBOARDING_COMPLETED_KEY, 'true');
       onNavigateToMain();
     } catch (error) {

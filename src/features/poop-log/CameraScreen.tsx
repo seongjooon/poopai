@@ -11,6 +11,7 @@ import {
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useRouter } from 'expo-router';
 import { Button, Typography } from '@src/ui/atoms';
+import { Analytics } from '@src/core/analytics';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const FRAME_SIZE = SCREEN_WIDTH * 0.72;
@@ -76,6 +77,7 @@ export function CameraScreen({ onCaptured }: CameraScreenProps) {
       }
 
       setPreviewBase64(photo.base64);
+      Analytics.trackPhotoCaptured();
     } catch {
       Alert.alert('Capture failed', 'Could not capture photo. Please try again.');
     } finally {

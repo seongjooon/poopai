@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import { useCameraPermissions } from 'expo-camera';
 import { Button, Typography } from '@src/ui/atoms';
+import { Analytics } from '@src/core/analytics';
 
 const SCAN_INTRO_SEEN_KEY = 'scan_intro_seen';
 
@@ -17,6 +18,10 @@ export default function ScanIntroRoute() {
   const router = useRouter();
   const [permission, requestPermission] = useCameraPermissions();
   const [isLoading, setIsLoading] = React.useState(false);
+
+  React.useEffect(() => {
+    Analytics.trackScanIntroViewed();
+  }, []);
 
   const continueToCamera = async () => {
     setIsLoading(true);
@@ -32,6 +37,7 @@ export default function ScanIntroRoute() {
       }
 
       await AsyncStorage.setItem(SCAN_INTRO_SEEN_KEY, 'true');
+      Analytics.trackCameraOpened();
       router.replace('/poop-log');
     } catch {
       setIsLoading(false);

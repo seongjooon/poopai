@@ -65,7 +65,58 @@ export const Analytics = {
     Analytics.track('Sign Up', { method });
   },
 
+  // ── Onboarding funnel ──
+  trackOnboardingStarted: () => {
+    Analytics.track('Onboarding Started');
+  },
+
+  trackOnboardingStepViewed: (stepIndex: number, stepId: string) => {
+    Analytics.track('Onboarding Step Viewed', { step_index: stepIndex, step_id: stepId });
+  },
+
+  trackOnboardingCompleted: (answers?: Record<string, string>) => {
+    Analytics.track('Onboarding Completed', answers);
+  },
+
+  trackOnboardingSkipped: (atStepIndex: number) => {
+    Analytics.track('Onboarding Skipped', { at_step_index: atStepIndex });
+  },
+
+  // ── Scan funnel ──
+  trackScanIntroViewed: () => {
+    Analytics.track('Scan Intro Viewed');
+  },
+
+  trackCameraOpened: () => {
+    Analytics.track('Camera Opened');
+  },
+
+  trackPhotoCaptured: () => {
+    Analytics.track('Photo Captured');
+  },
+
+  trackAnalysisStarted: () => {
+    Analytics.track('Analysis Started');
+  },
+
+  trackAnalysisCompleted: (gutScore: number, bristolType: number, warning: boolean) => {
+    Analytics.track('Analysis Completed', {
+      gut_score: gutScore,
+      bristol_type: bristolType,
+      warning,
+    });
+  },
+
+  trackAnalysisFailed: (error: string) => {
+    Analytics.track('Analysis Failed', { error });
+  },
+
+  trackResultShared: () => {
+    Analytics.track('Result Shared');
+  },
+
+  // Legacy alias
   trackOnboardingComplete: () => {
-    Analytics.track('Onboarding Complete');
+    Analytics.track('Onboarding Completed');
   },
 };

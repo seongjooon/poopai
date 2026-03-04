@@ -4,6 +4,7 @@ import { CameraScreen } from './CameraScreen';
 import { LoadingScreen } from './LoadingScreen';
 import { ResultCard } from './ResultCard';
 import { usePoopAnalysis } from './usePoopAnalysis';
+import { Analytics } from '@src/core/analytics';
 import type { AnalysisResult } from './schema';
 
 type FlowStep = 'camera' | 'loading' | 'result';
@@ -15,14 +16,21 @@ export function PoopLogScreen() {
 
   const handleCaptured = async (imageBase64: string) => {
     setStep('loading');
+    Analytics.trackAnalysisStarted();
 
     try {
       const analysisResult = await analyze({ imageBase64 });
+      Analytics.trackAnalysisCompleted(
+        analysisResult.gut_score,
+        analysisResult.bristol_type,
+        analysisResult.warning,
+      );
       setResult(analysisResult);
       setStep('result');
     } catch (error) {
-      setStep('camera');
       const detail = error instanceof Error ? error.message : String(error);
+      Analytics.trackAnalysisFailed(detail);
+      setStep('camera');
       Alert.alert(
         'Analysis failed',
         __DEV__

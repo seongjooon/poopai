@@ -3,6 +3,7 @@ import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 import { captureRef } from 'react-native-view-shot';
 import * as Sharing from 'expo-sharing';
 import { Button, Typography } from '@src/ui/atoms';
+import { Analytics } from '@src/core/analytics';
 import type { AnalysisResult } from './schema';
 
 interface ResultCardProps {
@@ -40,6 +41,8 @@ export function ResultCard({ result, onRetake }: ResultCardProps) {
       await Sharing.shareAsync(uri, {
         dialogTitle: 'Share your PoopAI result',
       });
+
+      Analytics.trackResultShared();
     } catch (error) {
       Alert.alert('Share failed', 'Could not share result card.');
     } finally {
