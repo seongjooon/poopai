@@ -138,10 +138,19 @@ export const useAuth = create<AuthState>((set, get) => ({
   },
 
   deleteAccount: async () => {
-    // TODO: Create a Supabase Edge Function that calls
-    // supabase.auth.admin.deleteUser(userId) and deletes user data
-    console.warn('[Auth] Delete account requires a Supabase Edge Function');
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
+    const { error: invokeError } = await supabase.functions.invoke('delete-account');
+
+    if (invokeError) {
+      throw new Error(invokeError.message || 'Failed to delete account');
+    }
+
+    // Sign out locally + reset RevenueCat
+    try {
+      await Purchases.logOut();
+    } catch {
+      // safe to ignore
+    }
+
+    await supabase.auth.signOut();
   },
 }));

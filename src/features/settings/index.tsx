@@ -136,25 +136,27 @@ export const SettingsScreen = ({ onClose }: SettingsScreenProps) => {
 
           <SettingsItem
             label="Privacy Policy"
-            onPress={() => openURL('https://example.com/privacy-policy')}
+            onPress={() => openURL('https://seongjooon.github.io/poopai/privacy/')}
           />
 
           <SettingsItem
             label="Terms of Service"
-            onPress={() => openURL('https://example.com/terms-of-service')}
+            onPress={() => openURL('https://seongjooon.github.io/poopai/terms/')}
             style={styles.lastItem}
           />
         </SettingsSection>
 
-        {/* Developer Section */}
-        <SettingsSection title="Developer">
-          <SettingsItem
-            label="Reset Onboarding"
-            value="Show onboarding + first scan intro again"
-            onPress={handleResetOnboarding}
-            style={styles.lastItem}
-          />
-        </SettingsSection>
+        {/* Developer Section — DEV only */}
+        {__DEV__ && (
+          <SettingsSection title="Developer">
+            <SettingsItem
+              label="Reset Onboarding"
+              value="Show onboarding + first scan intro again"
+              onPress={handleResetOnboarding}
+              style={styles.lastItem}
+            />
+          </SettingsSection>
+        )}
 
         {/* Version Info Footer */}
         <VersionInfo version={APP_VERSION} buildNumber={BUILD_NUMBER} />

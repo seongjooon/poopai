@@ -18,7 +18,8 @@
       "supportsTablet": false,
       "bundleIdentifier": "com.poopai.app",
       "infoPlist": {
-        "NSCameraUsageDescription": "PoopAI needs camera access to photograph and analyze your stool for gut health insights."
+        "NSCameraUsageDescription": "PoopAI needs camera access to photograph and analyze your stool for gut health insights.",
+        "NSPhotoLibraryUsageDescription": "PoopAI can save your result card images to your photo library for sharing."
       }
     },
     "android": {
@@ -26,7 +27,10 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.poopai.app"
+      "package": "com.poopai.app",
+      "permissions": [
+        "CAMERA"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
