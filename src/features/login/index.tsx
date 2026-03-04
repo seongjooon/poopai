@@ -1,8 +1,9 @@
+import { SafeAreaView } from 'react-native-safe-area-context';
 import React, { useState } from 'react';
 import {
   View,
   StyleSheet,
-  SafeAreaView,
+
   Platform,
   Alert,
 } from 'react-native';

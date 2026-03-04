@@ -22,9 +22,12 @@ export function PoopLogScreen() {
       setStep('result');
     } catch (error) {
       setStep('camera');
+      const detail = error instanceof Error ? error.message : String(error);
       Alert.alert(
         'Analysis failed',
-        'We could not analyze this photo. Please retake and try again.'
+        __DEV__
+          ? `${detail}`
+          : 'We could not analyze this photo. Please retake and try again.'
       );
     }
   };
