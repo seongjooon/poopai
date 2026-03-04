@@ -146,17 +146,7 @@ export const SettingsScreen = ({ onClose }: SettingsScreenProps) => {
           />
         </SettingsSection>
 
-        {/* Developer Section — DEV only */}
-        {__DEV__ && (
-          <SettingsSection title="Developer">
-            <SettingsItem
-              label="Reset Onboarding"
-              value="Show onboarding + first scan intro again"
-              onPress={handleResetOnboarding}
-              style={styles.lastItem}
-            />
-          </SettingsSection>
-        )}
+
 
         {/* Version Info Footer */}
         <VersionInfo version={APP_VERSION} buildNumber={BUILD_NUMBER} />
