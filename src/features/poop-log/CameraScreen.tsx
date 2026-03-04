@@ -4,6 +4,7 @@ import {
   Alert,
   Dimensions,
   Image,
+  Linking,
   StyleSheet,
   TouchableOpacity,
   View,
@@ -95,15 +96,24 @@ export function CameraScreen({ onCaptured }: CameraScreenProps) {
   }
 
   if (!permission.granted) {
+    // If user already denied once, canAskAgain is false — must go to Settings
+    const denied = permission.canAskAgain === false;
+
     return (
       <SafeAreaView style={styles.permissionContainer}>
         <Typography variant="h1" style={styles.permissionTitle}>
           Camera Access Needed
         </Typography>
         <Typography variant="body" color="#A4A9B6" style={styles.permissionText}>
-          PoopAI needs camera access to analyze stool images.
+          {denied
+            ? 'Camera permission was denied. Please enable it in Settings to continue.'
+            : 'PoopAI needs camera access to analyze stool images.'}
         </Typography>
-        <Button title="Allow Camera" onPress={requestPermission} />
+        {denied ? (
+          <Button title="Open Settings" onPress={() => Linking.openSettings()} />
+        ) : (
+          <Button title="Allow Camera" onPress={requestPermission} />
+        )}
       </SafeAreaView>
     );
   }
