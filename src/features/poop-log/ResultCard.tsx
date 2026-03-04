@@ -17,6 +17,21 @@ function scoreColor(score: number) {
   return '#FF453A';
 }
 
+function scoreLabel(score: number) {
+  if (score >= 80) return 'Great';
+  if (score >= 60) return 'Okay';
+  if (score >= 40) return 'Fair';
+  return 'Poor';
+}
+
+const METRIC_ICONS: Record<string, string> = {
+  bristol: '💩',
+  color: '🎨',
+  fragmentation: '🧩',
+  edge: '🔍',
+  volume: '📏',
+};
+
 export function ResultCard({ result, onRetake }: ResultCardProps) {
   const cardRef = useRef<View>(null);
   const [isSharing, setIsSharing] = useState(false);
@@ -50,84 +65,119 @@ export function ResultCard({ result, onRetake }: ResultCardProps) {
     }
   };
 
+  const color = scoreColor(result.gut_score);
+
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <View ref={cardRef} collapsable={false} style={styles.card}>
-        <Typography variant="h1" style={styles.title}>
-          💩 Gut Score {result.gut_score}
-        </Typography>
+        {/* ── Score Hero ── */}
+        <View style={styles.scoreSection}>
+          <View style={[styles.scoreBadge, { borderColor: color }]}>  
+            <Typography style={[styles.scoreNumber, { color }]}>
+              {result.gut_score}
+            </Typography>
+            <Typography variant="caption" style={[styles.scoreLabel, { color }]}>
+              {scoreLabel(result.gut_score)}
+            </Typography>
+          </View>
+          <Typography variant="body" color="#8B92A1" style={styles.scoreSubtext}>
+            Gut Score
+          </Typography>
+        </View>
 
+        {/* ── Score Bar ── */}
         <View style={styles.progressTrack}>
           <View
             style={[
               styles.progressFill,
               {
                 width: `${Math.max(0, Math.min(100, result.gut_score))}%`,
-                backgroundColor: scoreColor(result.gut_score),
+                backgroundColor: color,
               },
             ]}
           />
         </View>
 
+        {/* ── Metrics ── */}
         <View style={styles.metricsGrid}>
-          <Metric label="Bristol" value={`Type ${result.bristol_type}`} />
-          <Metric label="Color" value={result.color} />
-          <Metric label="Fragment" value={result.fragmentation} />
-          <Metric label="Edge" value={result.edge_fuzziness} />
-          <Metric label="Volume" value={result.volume} />
+          <MetricCard icon={METRIC_ICONS.bristol} label="Bristol" value={`Type ${result.bristol_type}`} />
+          <MetricCard icon={METRIC_ICONS.color} label="Color" value={result.color} />
+          <MetricCard icon={METRIC_ICONS.fragmentation} label="Fragment" value={result.fragmentation} />
+          <MetricCard icon={METRIC_ICONS.edge} label="Edge" value={result.edge_fuzziness} />
+          <MetricCard icon={METRIC_ICONS.volume} label="Volume" value={result.volume} />
         </View>
 
-        <View style={styles.section}>
-          <Typography variant="body" color="#9FA6B3">
-            Health Insight
-          </Typography>
-          <Typography variant="body" style={styles.sectionText}>
+        {/* ── Health Insight ── */}
+        <View style={styles.insightCard}>
+          <View style={styles.insightHeader}>
+            <Typography style={styles.insightIcon}>💡</Typography>
+            <Typography variant="body" color="#9FA6B3" style={styles.insightLabel}>
+              Health Insight
+            </Typography>
+          </View>
+          <Typography variant="body" style={styles.insightText}>
             {result.health_insight}
           </Typography>
         </View>
 
-        <View style={styles.section}>
-          <Typography variant="body" color="#9FA6B3">
-            Humor Check
-          </Typography>
-          <Typography variant="body" style={styles.sectionText}>
+        {/* ── Humor ── */}
+        <View style={styles.humorCard}>
+          <View style={styles.insightHeader}>
+            <Typography style={styles.insightIcon}>😄</Typography>
+            <Typography variant="body" color="#9FA6B3" style={styles.insightLabel}>
+              Humor Check
+            </Typography>
+          </View>
+          <Typography variant="body" style={styles.insightText}>
             {result.humor_comment}
           </Typography>
         </View>
 
+        {/* ── Warning ── */}
         {result.warning && (
           <View style={styles.warningBox}>
-            <Typography variant="body" color="#FF9B9B">
-              ⚠️ {result.warning_detail || 'Potential warning signs detected.'}
+            <Typography style={styles.warningIcon}>⚠️</Typography>
+            <Typography variant="body" color="#FF9B9B" style={styles.warningText}>
+              {result.warning_detail || 'Potential warning signs detected.'}
             </Typography>
           </View>
         )}
 
-        <Typography variant="caption" color="#8B92A1" style={styles.disclaimer}>
+        {/* ── Disclaimer + Brand ── */}
+        <Typography variant="caption" color="#5D6472" style={styles.disclaimer}>
           PoopAI provides wellness insights only and is not a medical diagnosis.
         </Typography>
 
-        <Typography variant="caption" color="#5D6472" style={styles.brand}>
-          PoopAI
-        </Typography>
+        <View style={styles.brandRow}>
+          <Typography variant="caption" color="#3A3F4B">
+            💩 PoopAI
+          </Typography>
+        </View>
       </View>
 
+      {/* ── Actions ── */}
       <View style={styles.actions}>
-        <Button title="Retake" variant="outline" onPress={onRetake} style={styles.actionButton} />
         <Button
-          title={isSharing ? 'Sharing...' : 'Share'}
+          title="↩ Retake"
+          variant="outline"
+          onPress={onRetake}
+          style={styles.actionButton}
+        />
+        <Button
+          title={isSharing ? 'Sharing...' : '📤 Share'}
           onPress={shareResult}
           loading={isSharing}
-          style={styles.actionButton}
+          style={[styles.actionButton, styles.shareButton]}
         />
       </View>
     </ScrollView>
   );
 }
 
-function Metric({ label, value }: { label: string; value: string }) {
+function MetricCard({ icon, label, value }: { icon: string; label: string; value: string }) {
   return (
     <View style={styles.metricCard}>
+      <Typography style={styles.metricIcon}>{icon}</Typography>
       <Typography variant="caption" color="#9FA6B3">
         {label}
       </Typography>
@@ -145,79 +195,158 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 16,
+    paddingBottom: 32,
     gap: 16,
   },
   card: {
     backgroundColor: '#141821',
     borderRadius: 24,
-    padding: 20,
+    padding: 22,
     borderWidth: 1,
     borderColor: '#212736',
+    gap: 16,
   },
-  title: {
-    color: '#FFFFFF',
-    marginBottom: 14,
+
+  /* ── Score Hero ── */
+  scoreSection: {
+    alignItems: 'center',
+    paddingTop: 8,
+    gap: 8,
   },
+  scoreBadge: {
+    width: 110,
+    height: 110,
+    borderRadius: 55,
+    borderWidth: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255,255,255,0.03)',
+  },
+  scoreNumber: {
+    fontSize: 40,
+    fontWeight: '800',
+  },
+  scoreLabel: {
+    fontSize: 13,
+    fontWeight: '600',
+    marginTop: -2,
+  },
+  scoreSubtext: {
+    fontSize: 14,
+  },
+
+  /* ── Progress ── */
   progressTrack: {
-    height: 12,
+    height: 10,
     backgroundColor: '#242B3A',
     borderRadius: 999,
     overflow: 'hidden',
-    marginBottom: 16,
   },
   progressFill: {
     height: '100%',
     borderRadius: 999,
   },
+
+  /* ── Metrics ── */
   metricsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 8,
-    marginBottom: 16,
   },
   metricCard: {
     backgroundColor: '#1C2230',
-    borderRadius: 12,
-    paddingVertical: 10,
+    borderRadius: 14,
+    paddingVertical: 12,
     paddingHorizontal: 12,
     minWidth: '30%',
+    flexGrow: 1,
     borderWidth: 1,
     borderColor: '#2A3244',
+    gap: 2,
+  },
+  metricIcon: {
+    fontSize: 16,
+    marginBottom: 2,
   },
   metricValue: {
-    marginTop: 4,
     color: '#FFFFFF',
     textTransform: 'capitalize',
+    fontWeight: '600',
+    marginTop: 2,
   },
-  section: {
-    marginTop: 8,
+
+  /* ── Insight / Humor Cards ── */
+  insightCard: {
+    backgroundColor: '#1A2030',
+    borderRadius: 14,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: '#252D3E',
+    gap: 8,
+  },
+  humorCard: {
+    backgroundColor: '#1E1A28',
+    borderRadius: 14,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: '#2D2540',
+    gap: 8,
+  },
+  insightHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 6,
   },
-  sectionText: {
+  insightIcon: {
+    fontSize: 16,
+  },
+  insightLabel: {
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  insightText: {
     color: '#FFFFFF',
     lineHeight: 22,
   },
+
+  /* ── Warning ── */
   warningBox: {
-    marginTop: 12,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 10,
     backgroundColor: 'rgba(255,69,58,0.12)',
     borderColor: 'rgba(255,69,58,0.4)',
     borderWidth: 1,
-    borderRadius: 12,
-    padding: 12,
+    borderRadius: 14,
+    padding: 14,
   },
+  warningIcon: {
+    fontSize: 22,
+    marginTop: 1,
+  },
+  warningText: {
+    flex: 1,
+    lineHeight: 22,
+  },
+
+  /* ── Footer ── */
   disclaimer: {
-    marginTop: 16,
     lineHeight: 18,
+    textAlign: 'center',
   },
-  brand: {
-    marginTop: 10,
+  brandRow: {
+    alignItems: 'center',
   },
+
+  /* ── Actions ── */
   actions: {
     flexDirection: 'row',
     gap: 12,
-    marginBottom: 12,
   },
   actionButton: {
     flex: 1,
+  },
+  shareButton: {
+    backgroundColor: '#0D3DFF',
   },
 });
