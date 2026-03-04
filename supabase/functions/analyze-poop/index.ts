@@ -143,18 +143,33 @@ serve(async (req) => {
       },
     };
 
-    const res = await fetch(GEMINI_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(geminiBody),
-    });
+    // Retry up to 2 times for transient Gemini errors (cold start, 503, etc.)
+    let res: Response | null = null;
+    let lastErr = '';
+    for (let attempt = 0; attempt < 2; attempt++) {
+      res = await fetch(GEMINI_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(geminiBody),
+      });
 
-    if (!res.ok) {
-      const errText = await res.text();
-      console.error('[analyze-poop] Gemini API error', res.status, errText);
+      if (res.ok) break;
+
+      lastErr = await res.text();
+      console.warn(`[analyze-poop] Gemini attempt ${attempt + 1} failed: ${res.status}`);
+
+      // Only retry on 5xx or 429
+      if (res.status < 500 && res.status !== 429) break;
+
+      // Brief delay before retry
+      if (attempt === 0) await new Promise((r) => setTimeout(r, 1000));
+    }
+
+    if (!res || !res.ok) {
+      console.error('[analyze-poop] Gemini API error', res?.status, lastErr);
       return jsonResponse(502, {
         error: 'Gemini API error',
-        detail: `${res.status}: ${errText.slice(0, 200)}`,
+        detail: `${res?.status}: ${lastErr.slice(0, 200)}`,
       });
     }
 

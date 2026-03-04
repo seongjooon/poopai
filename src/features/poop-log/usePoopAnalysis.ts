@@ -15,12 +15,22 @@ export function usePoopAnalysis() {
     setError(null);
 
     try {
-      const { data, error: invokeError } = await supabase.functions.invoke(
-        'analyze-poop',
-        {
+      let data: any;
+      let invokeError: any;
+
+      // Try up to 2 times (handles edge function cold start / transient errors)
+      for (let attempt = 0; attempt < 2; attempt++) {
+        const result = await supabase.functions.invoke('analyze-poop', {
           body: { imageBase64 },
-        }
-      );
+        });
+        data = result.data;
+        invokeError = result.error;
+
+        if (!invokeError) break;
+
+        console.warn(`[usePoopAnalysis] attempt ${attempt + 1} failed:`, invokeError.message);
+        if (attempt === 0) await new Promise((r) => setTimeout(r, 1500));
+      }
 
       if (invokeError) {
         throw new Error(invokeError.message || 'Analysis failed');
