@@ -81,7 +81,7 @@ export const useSettings = () => {
   }, []);
 
   const sendEmail = useCallback(() => {
-    const email = 'support@example.com';
+    const email = 'ksj537@icloud.com';
     const subject = 'Contact Support';
     const mailto = `mailto:${email}?subject=${encodeURIComponent(subject)}`;
 

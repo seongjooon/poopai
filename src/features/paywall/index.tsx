@@ -151,7 +151,7 @@ export const PaywallScreen = ({ onClose, isHardPaywall = false }: PaywallScreenP
         {/* Terms and Privacy */}
         <View style={styles.termsContainer}>
           <TouchableOpacity
-            onPress={() => openLink('https://example.com/privacy-policy')}
+            onPress={() => openLink('https://seongjooon.github.io/poopai/privacy/')}
           >
             <Typography variant="caption" color={colors.primary} style={styles.link}>
               Privacy Policy
@@ -161,7 +161,7 @@ export const PaywallScreen = ({ onClose, isHardPaywall = false }: PaywallScreenP
           <Typography variant="caption" style={styles.separator}>•</Typography>
 
           <TouchableOpacity
-            onPress={() => openLink('https://example.com/terms-of-service')}
+            onPress={() => openLink('https://seongjooon.github.io/poopai/terms/')}
           >
             <Typography variant="caption" color={colors.primary} style={styles.link}>
               Terms of Service
