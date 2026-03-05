@@ -41,6 +41,6 @@ yarn-error.*
 /android
 
 # Secrets (API Keys)
-config/secrets.ts
+# config/secrets.ts  # included in repo — values use env var fallbacks
 .env
 google-service-account.json
