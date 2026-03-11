@@ -14,6 +14,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useRouter } from 'expo-router';
 import { Button, Typography } from '@src/ui/atoms';
 import { Analytics } from '@src/core/analytics';
+import { pixelateImage } from '@src/utils/pixelate';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const FRAME_SIZE = SCREEN_WIDTH * 0.72;
@@ -56,11 +57,44 @@ function FrameCorner({
   );
 }
 
+/** Pixel grid overlay to hint at the pixelation effect */
+function GridOverlay() {
+  const gridSize = 16;
+  const cellSize = FRAME_SIZE / gridSize;
+  
+  const rows = [];
+  for (let i = 0; i < gridSize; i++) {
+    const cols = [];
+    for (let j = 0; j < gridSize; j++) {
+      cols.push(
+        <View
+          key={`${i}-${j}`}
+          style={[
+            styles.gridCell,
+            {
+              width: cellSize,
+              height: cellSize,
+            },
+          ]}
+        />
+      );
+    }
+    rows.push(
+      <View key={i} style={styles.gridRow}>
+        {cols}
+      </View>
+    );
+  }
+  
+  return <View style={styles.gridContainer}>{rows}</View>;
+}
+
 export function CameraScreen({ onCaptured }: CameraScreenProps) {
   const router = useRouter();
   const [permission, requestPermission] = useCameraPermissions();
   const [flash, setFlash] = useState<'off' | 'on'>('off');
   const [previewBase64, setPreviewBase64] = useState<string | null>(null);
+  const [originalBase64, setOriginalBase64] = useState<string | null>(null);
   const [isCapturing, setIsCapturing] = useState(false);
   const cameraRef = useRef<CameraView | null>(null);
 
@@ -78,7 +112,10 @@ export function CameraScreen({ onCaptured }: CameraScreenProps) {
         throw new Error('Failed to capture image');
       }
 
-      setPreviewBase64(photo.base64);
+      const pixelated = await pixelateImage(photo.base64);
+      
+      setOriginalBase64(photo.base64);
+      setPreviewBase64(pixelated);
       Analytics.trackPhotoCaptured();
     } catch {
       Alert.alert('Capture failed', 'Could not capture photo. Please try again.');
@@ -88,8 +125,8 @@ export function CameraScreen({ onCaptured }: CameraScreenProps) {
   };
 
   const confirmAnalyze = () => {
-    if (!previewBase64) return;
-    onCaptured(previewBase64);
+    if (!originalBase64) return;
+    onCaptured(originalBase64);
   };
 
   if (!permission) {
@@ -146,7 +183,10 @@ export function CameraScreen({ onCaptured }: CameraScreenProps) {
           <View style={styles.previewActions}>
             <TouchableOpacity
               style={styles.retakeButton}
-              onPress={() => setPreviewBase64(null)}
+              onPress={() => {
+                setPreviewBase64(null);
+                setOriginalBase64(null);
+              }}
               activeOpacity={0.7}
             >
               <Typography variant="body" color="#FFFFFF" style={styles.retakeText}>
@@ -186,6 +226,7 @@ export function CameraScreen({ onCaptured }: CameraScreenProps) {
         <View style={styles.overlayMiddleRow}>
           <View style={styles.overlaySide} />
           <View style={styles.frameCutout}>
+            <GridOverlay />
             <FrameCorner position="tl" />
             <FrameCorner position="tr" />
             <FrameCorner position="bl" />
@@ -287,6 +328,18 @@ const styles = StyleSheet.create({
     width: FRAME_SIZE,
     height: FRAME_SIZE,
     // transparent center
+  },
+  gridContainer: {
+    ...StyleSheet.absoluteFillObject,
+    opacity: 0.18,
+  },
+  gridRow: {
+    flexDirection: 'row',
+  },
+  gridCell: {
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: 'rgba(255,255,255,0.25)',
+    backgroundColor: 'transparent',
   },
   overlayBottom: {
     flex: 1,
