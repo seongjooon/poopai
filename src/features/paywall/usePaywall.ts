@@ -77,21 +77,50 @@ export const usePaywall = (onComplete?: () => void) => {
 
   const handlePurchase = useCallback(async () => {
     const pkg = packages.find((p) => p.id === selectedPackageId);
-    if (!pkg) return;
+    if (!pkg) {
+      console.warn('[Paywall] Purchase skipped: no selected package');
+      return;
+    }
 
     setIsPurchasing(true);
     setErrorMessage(null);
 
     try {
+      console.log('[Paywall] Purchase started', {
+        selectedPackageId,
+        hasRealPackages,
+        trialEligible,
+      });
+
       if (hasRealPackages && 'rcPackage' in pkg) {
         // Real RevenueCat purchase (trial is handled by the store automatically)
         await purchasePackage(pkg.rcPackage as PurchasesPackage);
+
+        const latestIsPro = usePayments.getState().isPro;
+        if (!latestIsPro) {
+          const message = 'Purchase did not activate Pro entitlement yet. Please wait a few seconds and try Restore Purchases.';
+          console.warn('[Paywall] Purchase completed but entitlement inactive', {
+            selectedPackageId,
+          });
+          setErrorMessage(message);
+          Alert.alert('Purchase Pending', message);
+          return;
+        }
       } else {
         // Mock purchase for development
         console.log('[Paywall] Mock purchase:', pkg.id);
       }
+
+      console.log('[Paywall] Purchase flow complete');
       onComplete?.();
     } catch (error: any) {
+      console.error('[Paywall] Purchase failed', {
+        message: error?.message,
+        code: error?.code,
+        userCancelled: error?.userCancelled,
+        underlyingErrorMessage: error?.underlyingErrorMessage,
+      });
+
       if (!error?.userCancelled) {
         const message = error?.message || 'Purchase failed. Please try again.';
         setErrorMessage(message);
@@ -100,7 +129,7 @@ export const usePaywall = (onComplete?: () => void) => {
     } finally {
       setIsPurchasing(false);
     }
-  }, [selectedPackageId, packages, hasRealPackages, purchasePackage, onComplete]);
+  }, [selectedPackageId, packages, hasRealPackages, purchasePackage, onComplete, trialEligible]);
 
   const handleRestore = useCallback(async () => {
     setIsPurchasing(true);
@@ -108,19 +137,28 @@ export const usePaywall = (onComplete?: () => void) => {
 
     try {
       await restorePurchases();
-      if (isPro) {
+      const latestIsPro = usePayments.getState().isPro;
+      console.log('[Paywall] Restore finished', { latestIsPro });
+
+      if (latestIsPro) {
         onComplete?.();
       } else {
         Alert.alert('No Purchases Found', 'We could not find any previous purchases to restore.');
       }
     } catch (error: any) {
+      console.error('[Paywall] Restore failed', {
+        message: error?.message,
+        code: error?.code,
+        userCancelled: error?.userCancelled,
+        underlyingErrorMessage: error?.underlyingErrorMessage,
+      });
       const message = error?.message || 'Restore failed. Please try again.';
       setErrorMessage(message);
       Alert.alert('Restore Error', message);
     } finally {
       setIsPurchasing(false);
     }
-  }, [restorePurchases, isPro, onComplete]);
+  }, [restorePurchases, onComplete]);
 
   return {
     packages,

@@ -79,16 +79,26 @@ export const usePayments = create<PaymentState>((set, get) => ({
     set({ isLoading: true });
     try {
       const { customerInfo } = await Purchases.purchasePackage(pkg);
+      const proActive = checkEntitlement(customerInfo);
       set({
         customerInfo,
-        isPro: checkEntitlement(customerInfo),
+        isPro: proActive,
         isLoading: false,
       });
+      console.log('[Payments] Purchase success', {
+        packageIdentifier: pkg.identifier,
+        productIdentifier: pkg.product.identifier,
+        proActive,
+      });
     } catch (error: any) {
+      console.error('[Payments] Purchase error', {
+        message: error?.message,
+        code: error?.code,
+        userCancelled: error?.userCancelled,
+        underlyingErrorMessage: error?.underlyingErrorMessage,
+      });
       set({ isLoading: false });
-      if (!error.userCancelled) {
-        throw error;
-      }
+      throw error;
     }
   },
 
@@ -96,12 +106,20 @@ export const usePayments = create<PaymentState>((set, get) => ({
     set({ isLoading: true });
     try {
       const customerInfo = await Purchases.restorePurchases();
+      const proActive = checkEntitlement(customerInfo);
       set({
         customerInfo,
-        isPro: checkEntitlement(customerInfo),
+        isPro: proActive,
         isLoading: false,
       });
-    } catch (error) {
+      console.log('[Payments] Restore complete', { proActive });
+    } catch (error: any) {
+      console.error('[Payments] Restore error', {
+        message: error?.message,
+        code: error?.code,
+        userCancelled: error?.userCancelled,
+        underlyingErrorMessage: error?.underlyingErrorMessage,
+      });
       set({ isLoading: false });
       throw error;
     }
