@@ -1,48 +1,41 @@
-import React, { useEffect, useMemo, useRef } from 'react';
-import { Animated, Easing, StyleSheet, View } from 'react-native';
+import React from 'react';
+import { ActivityIndicator, Image, StyleSheet, View } from 'react-native';
 import { Typography } from '@src/ui/atoms';
-import { useTheme } from '@config/theme';
-
-const LOADING_LINES = [
-  'Analyzing your masterpiece...',
-  'Consulting the gut experts...',
-  'Reading between the lines...',
-  'Checking your gut vibes...',
-  'Decoding your poop data...',
-];
+import { useTheme, type ThemePalette } from '@config/theme';
 
 export function LoadingScreen() {
-  const { theme } = useTheme();
-  const spinValue = useRef(new Animated.Value(0)).current;
+  const { theme, isDark } = useTheme();
+  const styles = React.useMemo(() => createStyles(theme, isDark), [theme, isDark]);
 
-  const line = useMemo(
-    () => LOADING_LINES[Math.floor(Math.random() * LOADING_LINES.length)],
-    []
+  return (
+    <View style={styles.container}>
+      <View style={styles.logoShell}>
+        <Image
+          source={require('../../../assets/icon.png')}
+          style={styles.logoImage}
+          resizeMode="cover"
+        />
+      </View>
+
+      <Typography variant="h1" style={styles.title}>
+        Poop AI
+      </Typography>
+      <Typography variant="body" color={theme.secondaryLabel} style={styles.subtitle}>
+        Poop Tracker
+      </Typography>
+
+      <View style={styles.loaderRow}>
+        <ActivityIndicator size="small" color={theme.primary} />
+        <Typography variant="caption" color={theme.secondaryLabel}>
+          Analyzing...
+        </Typography>
+      </View>
+    </View>
   );
+}
 
-  useEffect(() => {
-    const animation = Animated.loop(
-      Animated.timing(spinValue, {
-        toValue: 1,
-        duration: 1200,
-        easing: Easing.linear,
-        useNativeDriver: true,
-      })
-    );
-
-    animation.start();
-
-    return () => {
-      animation.stop();
-    };
-  }, [spinValue]);
-
-  const rotate = spinValue.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['0deg', '360deg'],
-  });
-
-  const styles = StyleSheet.create({
+function createStyles(theme: ThemePalette, isDark: boolean) {
+  return StyleSheet.create({
     container: {
       flex: 1,
       alignItems: 'center',
@@ -50,28 +43,38 @@ export function LoadingScreen() {
       backgroundColor: theme.background,
       paddingHorizontal: 24,
     },
-    emoji: {
-      fontSize: 64,
-      marginBottom: 20,
+    logoShell: {
+      width: 132,
+      height: 132,
+      borderRadius: 30,
+      overflow: 'hidden',
+      backgroundColor: theme.elevatedBackground,
+      shadowColor: '#000000',
+      shadowOpacity: isDark ? 0.45 : 0.14,
+      shadowRadius: 16,
+      shadowOffset: { width: 0, height: 8 },
+      elevation: 10,
+      marginBottom: 18,
+    },
+    logoImage: {
+      width: '100%',
+      height: '100%',
     },
     title: {
       color: theme.label,
-      marginBottom: 8,
+      fontSize: 38,
+      fontWeight: '700',
+      letterSpacing: -0.8,
     },
     subtitle: {
-      textAlign: 'center',
+      marginTop: 2,
+      marginBottom: 24,
+      fontSize: 17,
+    },
+    loaderRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
     },
   });
-
-  return (
-    <View style={styles.container}>
-      <Animated.Text style={[styles.emoji, { transform: [{ rotate }] }]}>💩</Animated.Text>
-      <Typography variant="h1" style={styles.title}>
-        Analyzing...
-      </Typography>
-      <Typography variant="body" color={theme.secondaryLabel} style={styles.subtitle}>
-        {line}
-      </Typography>
-    </View>
-  );
 }
