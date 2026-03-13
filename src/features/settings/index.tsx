@@ -14,13 +14,14 @@ import {
   VersionInfo,
 } from './components';
 import { useSettings } from './useSettings';
-import { colors, spacing } from '@config/theme';
+import { spacing, useTheme, type ThemeMode } from '@config/theme';
 
 interface SettingsScreenProps {
   onClose?: () => void;
 }
 
 export const SettingsScreen = ({ onClose }: SettingsScreenProps) => {
+  const { theme, themeMode, setThemeMode } = useTheme();
   const {
     user,
     isPro,
@@ -35,6 +36,96 @@ export const SettingsScreen = ({ onClose }: SettingsScreenProps) => {
 
   const APP_VERSION = '1.0.0';
   const BUILD_NUMBER = '1';
+  const themeOptions: Array<{ label: string; value: ThemeMode }> = [
+    { label: 'System', value: 'system' },
+    { label: 'Light', value: 'light' },
+    { label: 'Dark', value: 'dark' },
+  ];
+
+  const handleThemeChange = async (mode: ThemeMode) => {
+    await setThemeMode(mode);
+  };
+
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.secondaryBackground,
+    },
+    header: {
+      paddingHorizontal: spacing.l,
+      paddingTop: spacing.m,
+      paddingBottom: spacing.m,
+      backgroundColor: theme.background,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: theme.separator,
+    },
+    handleBar: {
+      width: 36,
+      height: 5,
+      borderRadius: 3,
+      backgroundColor: theme.tertiaryLabel,
+      alignSelf: 'center',
+      marginBottom: 12,
+    },
+    headerRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    title: {
+      marginBottom: 0,
+      fontSize: 28,
+      color: theme.label,
+    },
+    doneButton: {
+      paddingVertical: spacing.s,
+      paddingHorizontal: 4,
+    },
+    doneText: {
+      fontSize: 17,
+      fontWeight: '600',
+    },
+    proPromoBanner: {
+      backgroundColor: theme.primary,
+      marginHorizontal: spacing.l,
+      marginVertical: spacing.l,
+      paddingVertical: spacing.m,
+      paddingHorizontal: spacing.l,
+      borderRadius: 12,
+      alignItems: 'center',
+    },
+    proPromoText: {
+      fontWeight: '600',
+    },
+    lastItem: {
+      borderBottomWidth: 0,
+    },
+    themeOption: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingVertical: 12,
+      paddingHorizontal: spacing.m,
+      backgroundColor: theme.background,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: theme.separator,
+    },
+    themeOptionSelected: {
+      backgroundColor: theme.accentBackground,
+    },
+    themeOptionLast: {
+      borderBottomWidth: 0,
+    },
+    themeOptionText: {
+      fontSize: 17,
+      color: theme.label,
+    },
+    checkmark: {
+      fontSize: 17,
+      color: theme.systemBlue,
+      fontWeight: '600',
+    },
+  });
 
   return (
     <SafeAreaView style={styles.container}>
@@ -50,7 +141,7 @@ export const SettingsScreen = ({ onClose }: SettingsScreenProps) => {
             </Typography>
             {onClose && (
               <TouchableOpacity onPress={onClose} style={styles.doneButton}>
-                <Typography color={colors.primary} style={styles.doneText}>Done</Typography>
+                <Typography color={theme.primary} style={styles.doneText}>Done</Typography>
               </TouchableOpacity>
             )}
           </View>
@@ -61,13 +152,38 @@ export const SettingsScreen = ({ onClose }: SettingsScreenProps) => {
           <View style={styles.proPromoBanner}>
             <Typography
               variant="body"
-              color="#FFFFFF"
+              color={theme.onPrimary}
               style={styles.proPromoText}
             >
               Upgrade to Pro for unlimited access
             </Typography>
           </View>
         )}
+
+        {/* Appearance Section */}
+        <SettingsSection title="Appearance">
+          {themeOptions.map((option, index) => {
+            const isSelected = themeMode === option.value;
+            const isLast = index === themeOptions.length - 1;
+
+            return (
+              <TouchableOpacity
+                key={option.value}
+                style={[
+                  styles.themeOption,
+                  isSelected && styles.themeOptionSelected,
+                  isLast && styles.themeOptionLast,
+                ]}
+                onPress={() => {
+                  void handleThemeChange(option.value);
+                }}
+              >
+                <Typography style={styles.themeOptionText}>{option.label}</Typography>
+                {isSelected && <Typography style={styles.checkmark}>✓</Typography>}
+              </TouchableOpacity>
+            );
+          })}
+        </SettingsSection>
 
         {/* Account Section */}
         <SettingsSection title="Account">
@@ -156,58 +272,3 @@ export const SettingsScreen = ({ onClose }: SettingsScreenProps) => {
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F9F9F9',
-  },
-  header: {
-    paddingHorizontal: spacing.l,
-    paddingTop: spacing.m,
-    paddingBottom: spacing.m,
-    backgroundColor: colors.background,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#E5E5EA',
-  },
-  handleBar: {
-    width: 36,
-    height: 5,
-    borderRadius: 3,
-    backgroundColor: '#D1D1D6',
-    alignSelf: 'center',
-    marginBottom: 12,
-  },
-  headerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  title: {
-    marginBottom: 0,
-    fontSize: 28,
-  },
-  doneButton: {
-    paddingVertical: spacing.s,
-    paddingHorizontal: 4,
-  },
-  doneText: {
-    fontSize: 17,
-    fontWeight: '600',
-  },
-  proPromoBanner: {
-    backgroundColor: colors.primary,
-    marginHorizontal: spacing.l,
-    marginVertical: spacing.l,
-    paddingVertical: spacing.m,
-    paddingHorizontal: spacing.l,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  proPromoText: {
-    fontWeight: '600',
-  },
-  lastItem: {
-    borderBottomWidth: 0,
-  },
-});

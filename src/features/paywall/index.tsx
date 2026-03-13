@@ -11,7 +11,7 @@ import {
 import { Button, Typography } from '@src/ui/atoms';
 import { PackageCard, BenefitList } from './components';
 import { usePaywall } from './usePaywall';
-import { spacing, colors } from '@config/theme';
+import { spacing, useTheme, type ThemePalette } from '@config/theme';
 import contents from '@config/contents.json';
 
 interface PaywallScreenProps {
@@ -21,6 +21,7 @@ interface PaywallScreenProps {
 }
 
 export const PaywallScreen = ({ onClose, isHardPaywall = false }: PaywallScreenProps) => {
+  const { theme } = useTheme();
   const {
     packages,
     selectedPackageId,
@@ -31,6 +32,7 @@ export const PaywallScreen = ({ onClose, isHardPaywall = false }: PaywallScreenP
     handlePurchase,
     handleRestore,
   } = usePaywall(onClose);
+  const styles = React.useMemo(() => createStyles(theme), [theme]);
 
   const paywallContent = contents.paywall;
   const selectedPackage = packages.find((pkg) => pkg.id === selectedPackageId);
@@ -62,7 +64,7 @@ export const PaywallScreen = ({ onClose, isHardPaywall = false }: PaywallScreenP
               onPress={onClose}
               style={styles.closeButton}
             >
-              <Typography color={colors.primary}>✕</Typography>
+              <Typography color={theme.primary}>✕</Typography>
             </TouchableOpacity>
           )}
 
@@ -82,7 +84,7 @@ export const PaywallScreen = ({ onClose, isHardPaywall = false }: PaywallScreenP
           {/* Trial Badge */}
           {trialEligible && (
             <View style={styles.trialBadge}>
-              <Typography variant="body" color="#FFFFFF" style={styles.trialBadgeText}>
+              <Typography variant="body" color={theme.onPrimary} style={styles.trialBadgeText}>
                 🎉 {trialDays} days free — cancel anytime
               </Typography>
             </View>
@@ -110,7 +112,7 @@ export const PaywallScreen = ({ onClose, isHardPaywall = false }: PaywallScreenP
         {/* Error Message */}
         {errorMessage && (
           <View style={styles.errorContainer}>
-            <Typography color={colors.error}>{errorMessage}</Typography>
+            <Typography color={theme.error}>{errorMessage}</Typography>
           </View>
         )}
       </ScrollView>
@@ -141,7 +143,7 @@ export const PaywallScreen = ({ onClose, isHardPaywall = false }: PaywallScreenP
         >
           <Typography
             variant="caption"
-            color={colors.primary}
+            color={theme.primary}
             style={styles.restoreText}
           >
             Restore Purchases
@@ -153,7 +155,7 @@ export const PaywallScreen = ({ onClose, isHardPaywall = false }: PaywallScreenP
           <TouchableOpacity
             onPress={() => openLink('https://seongjooon.github.io/poopai/privacy/')}
           >
-            <Typography variant="caption" color={colors.primary} style={styles.link}>
+            <Typography variant="caption" color={theme.primary} style={styles.link}>
               Privacy Policy
             </Typography>
           </TouchableOpacity>
@@ -163,7 +165,7 @@ export const PaywallScreen = ({ onClose, isHardPaywall = false }: PaywallScreenP
           <TouchableOpacity
             onPress={() => openLink('https://seongjooon.github.io/poopai/terms/')}
           >
-            <Typography variant="caption" color={colors.primary} style={styles.link}>
+            <Typography variant="caption" color={theme.primary} style={styles.link}>
               Terms of Service
             </Typography>
           </TouchableOpacity>
@@ -178,104 +180,112 @@ export const PaywallScreen = ({ onClose, isHardPaywall = false }: PaywallScreenP
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  scrollContent: {
-    paddingHorizontal: spacing.l,
-    paddingTop: spacing.l,
-  },
-  header: {
-    alignItems: 'center',
-    marginBottom: spacing.xl,
-    position: 'relative',
-  },
-  closeButton: {
-    position: 'absolute',
-    top: -spacing.m,
-    right: -spacing.l,
-    padding: spacing.m,
-    zIndex: 10,
-  },
-  headerImage: {
-    width: '100%',
-    height: 200,
-    backgroundColor: '#F0F0F0',
-    borderRadius: 16,
-    marginBottom: spacing.l,
-  },
-  title: {
-    textAlign: 'center',
-    marginBottom: spacing.s,
-  },
-  subtitle: {
-    textAlign: 'center',
-    color: '#666666',
-  },
-  trialBadge: {
-    backgroundColor: colors.success,
-    paddingHorizontal: spacing.m,
-    paddingVertical: spacing.s,
-    borderRadius: 20,
-    marginTop: spacing.m,
-  },
-  trialBadgeText: {
-    fontWeight: '600',
-    fontSize: 14,
-  },
-  benefitsSection: {
-    marginBottom: spacing.l,
-  },
-  packagesSection: {
-    marginBottom: spacing.xl,
-  },
-  errorContainer: {
-    backgroundColor: '#FFEBEE',
-    paddingHorizontal: spacing.m,
-    paddingVertical: spacing.m,
-    borderRadius: 8,
-    marginBottom: spacing.m,
-  },
-  footer: {
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-    paddingHorizontal: spacing.l,
-    paddingVertical: spacing.l,
-  },
-  subscribeButton: {
-    marginBottom: spacing.s,
-  },
-  trialDisclosure: {
-    textAlign: 'center',
-    color: '#999999',
-    marginBottom: spacing.s,
-  },
-  restoreButton: {
-    paddingVertical: spacing.m,
-    alignItems: 'center',
-  },
-  restoreText: {
-    fontWeight: '600',
-    textDecorationLine: 'underline',
-  },
-  termsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginVertical: spacing.m,
-    gap: spacing.s,
-  },
-  link: {
-    fontWeight: '500',
-  },
-  separator: {
-    color: colors.border,
-  },
-  disclaimer: {
-    textAlign: 'center',
-    color: '#999999',
-    marginTop: spacing.m,
-  },
-});
+function createStyles(theme: ThemePalette) {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.background,
+    },
+    scrollContent: {
+      paddingHorizontal: spacing.l,
+      paddingTop: spacing.l,
+    },
+    header: {
+      alignItems: 'center',
+      marginBottom: spacing.xl,
+      position: 'relative',
+    },
+    closeButton: {
+      position: 'absolute',
+      top: -spacing.m,
+      right: -spacing.l,
+      padding: spacing.m,
+      zIndex: 10,
+    },
+    headerImage: {
+      width: '100%',
+      height: 200,
+      backgroundColor: theme.secondaryBackground,
+      borderRadius: 16,
+      marginBottom: spacing.l,
+      borderWidth: 1,
+      borderColor: theme.separator,
+    },
+    title: {
+      textAlign: 'center',
+      marginBottom: spacing.s,
+      color: theme.label,
+    },
+    subtitle: {
+      textAlign: 'center',
+      color: theme.secondaryLabel,
+    },
+    trialBadge: {
+      backgroundColor: theme.success,
+      paddingHorizontal: spacing.m,
+      paddingVertical: spacing.s,
+      borderRadius: 20,
+      marginTop: spacing.m,
+    },
+    trialBadgeText: {
+      fontWeight: '600',
+      fontSize: 14,
+    },
+    benefitsSection: {
+      marginBottom: spacing.l,
+    },
+    packagesSection: {
+      marginBottom: spacing.xl,
+    },
+    errorContainer: {
+      backgroundColor: theme.errorBackground,
+      paddingHorizontal: spacing.m,
+      paddingVertical: spacing.m,
+      borderRadius: 8,
+      marginBottom: spacing.m,
+      borderWidth: 1,
+      borderColor: theme.error,
+    },
+    footer: {
+      borderTopWidth: 1,
+      borderTopColor: theme.border,
+      paddingHorizontal: spacing.l,
+      paddingVertical: spacing.l,
+      backgroundColor: theme.background,
+    },
+    subscribeButton: {
+      marginBottom: spacing.s,
+    },
+    trialDisclosure: {
+      textAlign: 'center',
+      color: theme.tertiaryLabel,
+      marginBottom: spacing.s,
+    },
+    restoreButton: {
+      paddingVertical: spacing.m,
+      alignItems: 'center',
+    },
+    restoreText: {
+      fontWeight: '600',
+      textDecorationLine: 'underline',
+    },
+    termsContainer: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginVertical: spacing.m,
+      gap: spacing.s,
+    },
+    link: {
+      fontWeight: '500',
+    },
+    separator: {
+      color: theme.separator,
+    },
+    disclaimer: {
+      textAlign: 'center',
+      color: theme.tertiaryLabel,
+      marginTop: spacing.m,
+    },
+  });
+}

@@ -6,11 +6,14 @@ import { useAuth } from '../core/auth';
 import { usePayments, configurePayments } from '../core/payments';
 import { Analytics } from '../core/analytics';
 import Constants from 'expo-constants';
+import { ThemeProvider, useTheme } from '@config/theme';
 
 // In Expo Go, RevenueCat native store is unavailable — skip paywall gate
 const isExpoGo = Constants.appOwnership === 'expo';
 
-export default function RootLayout() {
+
+function RootLayoutContent() {
+  const { theme } = useTheme();
   const router = useRouter();
   const segments = useSegments();
   const user = useAuth((s) => s.user);
@@ -83,7 +86,7 @@ export default function RootLayout() {
 
   return (
     <>
-      <StatusBar style="auto" />
+      <StatusBar style={theme.statusBarStyle === 'light-content' ? 'light' : 'dark'} />
       <Stack screenOptions={{ headerShown: false, animation: 'default' }}>
         <Stack.Screen name="index" />
         <Stack.Screen name="onboarding" options={{ animation: 'fade' }} />
@@ -94,5 +97,13 @@ export default function RootLayout() {
         <Stack.Screen name="settings" options={{ presentation: 'modal' }} />
       </Stack>
     </>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <ThemeProvider>
+      <RootLayoutContent />
+    </ThemeProvider>
   );
 }

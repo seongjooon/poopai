@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef } from 'react';
 import { Animated, Easing, StyleSheet, View } from 'react-native';
 import { Typography } from '@src/ui/atoms';
+import { useTheme } from '@config/theme';
 
 const LOADING_LINES = [
   'Analyzing your masterpiece...',
@@ -11,6 +12,7 @@ const LOADING_LINES = [
 ];
 
 export function LoadingScreen() {
+  const { theme } = useTheme();
   const spinValue = useRef(new Animated.Value(0)).current;
 
   const line = useMemo(
@@ -40,36 +42,36 @@ export function LoadingScreen() {
     outputRange: ['0deg', '360deg'],
   });
 
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: theme.background,
+      paddingHorizontal: 24,
+    },
+    emoji: {
+      fontSize: 64,
+      marginBottom: 20,
+    },
+    title: {
+      color: theme.label,
+      marginBottom: 8,
+    },
+    subtitle: {
+      textAlign: 'center',
+    },
+  });
+
   return (
     <View style={styles.container}>
       <Animated.Text style={[styles.emoji, { transform: [{ rotate }] }]}>💩</Animated.Text>
       <Typography variant="h1" style={styles.title}>
         Analyzing...
       </Typography>
-      <Typography variant="body" color="#B5B8C3" style={styles.subtitle}>
+      <Typography variant="body" color={theme.secondaryLabel} style={styles.subtitle}>
         {line}
       </Typography>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#0D0F14',
-    paddingHorizontal: 24,
-  },
-  emoji: {
-    fontSize: 64,
-    marginBottom: 20,
-  },
-  title: {
-    color: '#FFFFFF',
-    marginBottom: 8,
-  },
-  subtitle: {
-    textAlign: 'center',
-  },
-});

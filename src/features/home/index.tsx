@@ -13,14 +13,18 @@ import { Typography, Button } from '@src/ui/atoms';
 import { usePoopLogs } from './usePoopLogs';
 import { calcStreak } from './useStreak';
 import { WeekBar } from './WeekBar';
-import { styles } from './styles';
+import { useStyles } from './useStyles';
+import { useTheme } from '@config/theme';
 
 const SCAN_INTRO_SEEN_KEY = 'scan_intro_seen';
 
-function scoreColor(score: number) {
-  if (score >= 80) return '#34C759';
-  if (score >= 60) return '#FFCC00';
-  return '#FF453A';
+function useScoreColor() {
+  const { theme } = useTheme();
+  return (score: number) => {
+    if (score >= 80) return theme.systemGreen;
+    if (score >= 60) return theme.systemYellow;
+    return theme.systemRed;
+  };
 }
 
 function scoreLabel(score: number) {
@@ -54,6 +58,9 @@ function formatTime(dateStr: string) {
 
 export function HomeScreen() {
   const router = useRouter();
+  const { theme } = useTheme();
+  const styles = useStyles();
+  const scoreColor = useScoreColor();
   const { logs, isLoading, refetch } = usePoopLogs();
 
   const streak = useMemo(() => calcStreak(logs), [logs]);
@@ -97,7 +104,7 @@ export function HomeScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={isLoading} onRefresh={refetch} tintColor="#0D3DFF" />
+          <RefreshControl refreshing={isLoading} onRefresh={refetch} tintColor={theme.systemBlue} />
         }
       >
         {/* Week Bar */}
@@ -125,17 +132,17 @@ export function HomeScreen() {
                 <Typography variant="body" style={styles.scoreTitle}>
                   Latest Gut Score
                 </Typography>
-                <Typography variant="caption" color="#8B92A1">
+                <Typography variant="caption" color={theme.secondaryLabel}>
                   Bristol Type {latestLog.bristol_type} · {latestLog.color}
                 </Typography>
-                <Typography variant="caption" color="#5D6472" style={styles.scoreTime}>
+                <Typography variant="caption" color={theme.tertiaryLabel} style={styles.scoreTime}>
                   {formatTime(latestLog.created_at)}
                 </Typography>
               </View>
             </View>
             <View style={styles.insightRow}>
               <Typography style={styles.insightIcon}>💡</Typography>
-              <Typography variant="caption" color="#B5B8C3" style={styles.insightText}>
+              <Typography variant="caption" color={theme.secondaryLabel} style={styles.insightText}>
                 {latestLog.health_insight}
               </Typography>
             </View>
@@ -146,7 +153,7 @@ export function HomeScreen() {
             <Typography variant="body" style={styles.emptyTitle}>
               No scans yet
             </Typography>
-            <Typography variant="caption" color="#8B92A1" style={styles.emptySubtitle}>
+            <Typography variant="caption" color={theme.secondaryLabel} style={styles.emptySubtitle}>
               Take your first scan to see your gut health insights
             </Typography>
             <Button
@@ -177,12 +184,12 @@ export function HomeScreen() {
                       <Typography variant="body" style={styles.recentScore}>
                         Score {log.gut_score}
                       </Typography>
-                      <Typography variant="caption" color="#8B92A1">
+                      <Typography variant="caption" color={theme.secondaryLabel}>
                         Type {log.bristol_type} · {log.color}
                       </Typography>
                     </View>
                   </View>
-                  <Typography variant="caption" color="#5D6472">
+                  <Typography variant="caption" color={theme.tertiaryLabel}>
                     {formatTime(log.created_at)}
                   </Typography>
                 </View>

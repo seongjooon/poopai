@@ -1,6 +1,6 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { colors, spacing } from '@config/theme';
+import { spacing, useTheme, type ThemePalette } from '@config/theme';
 
 interface Props {
   children: ReactNode;
@@ -10,7 +10,7 @@ interface State {
   hasError: boolean;
 }
 
-export class ErrorBoundary extends Component<Props, State> {
+class ErrorBoundaryClass extends Component<Props & { theme: ThemePalette }, State> {
   state: State = { hasError: false };
 
   static getDerivedStateFromError(): State {
@@ -19,8 +19,6 @@ export class ErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, info: ErrorInfo) {
     console.error('[ErrorBoundary]', error, info.componentStack);
-    // TODO: Log to analytics when wired up
-    // Analytics.logError(error, info.componentStack);
   }
 
   handleRestart = () => {
@@ -29,12 +27,14 @@ export class ErrorBoundary extends Component<Props, State> {
 
   render() {
     if (this.state.hasError) {
+      const styles = createStyles(this.props.theme);
+
       return (
         <View style={styles.container}>
           <Text style={styles.emoji}>:(</Text>
           <Text style={styles.title}>Something went wrong</Text>
           <Text style={styles.message}>
-            An unexpected error occurred.{'\n'}Please restart the app.
+            An unexpected error occurred.{`\n`}Please restart the app.
           </Text>
           <TouchableOpacity
             style={styles.button}
@@ -50,42 +50,50 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: spacing.l,
-  },
-  emoji: {
-    fontSize: 48,
-    marginBottom: spacing.m,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: colors.text,
-    marginBottom: spacing.s,
-  },
-  message: {
-    fontSize: 16,
-    color: '#8E8E93',
-    textAlign: 'center',
-    lineHeight: 24,
-    marginBottom: spacing.xl,
-  },
-  button: {
-    backgroundColor: colors.primary,
-    paddingVertical: spacing.m,
-    paddingHorizontal: spacing.l,
-    borderRadius: 12,
-    minWidth: 200,
-    alignItems: 'center',
-  },
-  buttonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-});
+export function ErrorBoundary({ children }: Props) {
+  const { theme } = useTheme();
+  return <ErrorBoundaryClass theme={theme}>{children}</ErrorBoundaryClass>;
+}
+
+function createStyles(theme: ThemePalette) {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.background,
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingHorizontal: spacing.l,
+    },
+    emoji: {
+      fontSize: 48,
+      marginBottom: spacing.m,
+      color: theme.label,
+    },
+    title: {
+      fontSize: 24,
+      fontWeight: '700',
+      color: theme.label,
+      marginBottom: spacing.s,
+    },
+    message: {
+      fontSize: 16,
+      color: theme.secondaryLabel,
+      textAlign: 'center',
+      lineHeight: 24,
+      marginBottom: spacing.xl,
+    },
+    button: {
+      backgroundColor: theme.primary,
+      paddingVertical: spacing.m,
+      paddingHorizontal: spacing.l,
+      borderRadius: 12,
+      minWidth: 200,
+      alignItems: 'center',
+    },
+    buttonText: {
+      color: theme.onPrimary,
+      fontSize: 16,
+      fontWeight: '600',
+    },
+  });
+}

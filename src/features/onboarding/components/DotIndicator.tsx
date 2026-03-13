@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { colors, spacing } from '@config/theme';
+import { spacing, useTheme, type ThemePalette } from '@config/theme';
 
 interface DotIndicatorProps {
   totalSteps: number;
@@ -8,6 +8,9 @@ interface DotIndicatorProps {
 }
 
 export const DotIndicator = ({ totalSteps, currentStepIndex }: DotIndicatorProps) => {
+  const { theme } = useTheme();
+  const styles = React.useMemo(() => createStyles(theme), [theme]);
+
   return (
     <View style={styles.container}>
       {Array.from({ length: totalSteps }).map((_, index) => (
@@ -16,7 +19,7 @@ export const DotIndicator = ({ totalSteps, currentStepIndex }: DotIndicatorProps
           style={[
             styles.dot,
             {
-              backgroundColor: index === currentStepIndex ? colors.primary : colors.border,
+              backgroundColor: index === currentStepIndex ? theme.primary : theme.border,
             },
           ]}
         />
@@ -25,16 +28,20 @@ export const DotIndicator = ({ totalSteps, currentStepIndex }: DotIndicatorProps
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: spacing.s,
-  },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-  },
-});
+function createStyles(theme: ThemePalette) {
+  return StyleSheet.create({
+    container: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+      gap: spacing.s,
+    },
+    dot: {
+      width: 8,
+      height: 8,
+      borderRadius: 4,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: theme.separator,
+    },
+  });
+}

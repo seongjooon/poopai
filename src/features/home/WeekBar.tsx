@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Typography } from '@src/ui/atoms';
 import type { PoopLog } from './usePoopLogs';
+import { useTheme } from '@config/theme';
 
 const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
@@ -10,6 +11,55 @@ interface WeekBarProps {
 }
 
 export function WeekBar({ logs }: WeekBarProps) {
+  const { theme } = useTheme();
+  
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        container: {
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          paddingHorizontal: 4,
+          paddingVertical: 12,
+        },
+        dayCol: {
+          alignItems: 'center',
+          gap: 4,
+          flex: 1,
+        },
+        label: {
+          fontSize: 11,
+          fontWeight: '600',
+        },
+        circle: {
+          width: 36,
+          height: 36,
+          borderRadius: 18,
+          alignItems: 'center',
+          justifyContent: 'center',
+        },
+        circleToday: {
+          borderWidth: 2,
+          borderColor: theme.systemBlue,
+        },
+        circleLogged: {
+          backgroundColor: theme.systemBlue,
+          borderWidth: 0,
+        },
+        dateText: {
+          fontSize: 14,
+          fontWeight: '600',
+        },
+        dot: {
+          width: 4,
+          height: 4,
+          borderRadius: 2,
+          backgroundColor: theme.systemBlue,
+        },
+      }),
+    [theme]
+  );
+  
   const { days, todayIndex } = useMemo(() => {
     const now = new Date();
     // Monday = 0
@@ -50,7 +100,7 @@ export function WeekBar({ logs }: WeekBarProps) {
           <View key={i} style={styles.dayCol}>
             <Typography
               variant="caption"
-              color={isToday ? '#0D3DFF' : '#8B92A1'}
+              color={isToday ? theme.systemBlue : theme.secondaryLabel}
               style={styles.label}
             >
               {day.label}
@@ -64,7 +114,7 @@ export function WeekBar({ logs }: WeekBarProps) {
             >
               <Typography
                 variant="body"
-                color={day.hasLog ? '#FFFFFF' : isToday ? '#0D3DFF' : '#C0C6D2'}
+                color={day.hasLog ? theme.onPrimary : isToday ? theme.systemBlue : theme.tertiaryLabel}
                 style={styles.dateText}
               >
                 {day.date}
@@ -77,46 +127,3 @@ export function WeekBar({ logs }: WeekBarProps) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: 4,
-    paddingVertical: 12,
-  },
-  dayCol: {
-    alignItems: 'center',
-    gap: 4,
-    flex: 1,
-  },
-  label: {
-    fontSize: 11,
-    fontWeight: '600',
-  },
-  circle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  circleToday: {
-    borderWidth: 2,
-    borderColor: '#0D3DFF',
-  },
-  circleLogged: {
-    backgroundColor: '#0D3DFF',
-    borderWidth: 0,
-  },
-  dateText: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  dot: {
-    width: 4,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: '#0D3DFF',
-  },
-});

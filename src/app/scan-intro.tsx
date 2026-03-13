@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import { useCameraPermissions } from 'expo-camera';
 import { Button, Typography } from '@src/ui/atoms';
 import { Analytics } from '@src/core/analytics';
+import { useTheme } from '@config/theme';
 
 const SCAN_INTRO_SEEN_KEY = 'scan_intro_seen';
 
@@ -15,6 +16,7 @@ const tips = [
 ];
 
 export default function ScanIntroRoute() {
+  const { theme } = useTheme();
   const router = useRouter();
   const [permission, requestPermission] = useCameraPermissions();
   const [isLoading, setIsLoading] = React.useState(false);
@@ -46,6 +48,98 @@ export default function ScanIntroRoute() {
 
   const denied = Boolean(permission) && !permission?.granted;
 
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.background,
+      paddingHorizontal: 24,
+      paddingTop: 80,
+      paddingBottom: 34,
+    },
+
+    // Hero
+    heroSection: {
+      alignItems: 'center',
+      marginBottom: 32,
+    },
+    heroIconWrap: {
+      width: 100,
+      height: 100,
+      borderRadius: 28,
+      backgroundColor: theme.systemBlue + '15',
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: 20,
+      borderWidth: 1,
+      borderColor: theme.systemBlue + '25',
+    },
+    heroIcon: {
+      fontSize: 44,
+    },
+    title: {
+      color: theme.label,
+      marginBottom: 6,
+      textAlign: 'center',
+    },
+    subtitle: {
+      textAlign: 'center',
+      lineHeight: 22,
+    },
+
+    // Tips
+    tipsContainer: {
+      gap: 12,
+    },
+    tipCard: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: theme.cardBackground,
+      borderRadius: 16,
+      padding: 16,
+      borderWidth: 1,
+      borderColor: theme.cardBorder,
+      gap: 14,
+    },
+    tipIconWrap: {
+      width: 48,
+      height: 48,
+      borderRadius: 14,
+      backgroundColor: theme.background,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderWidth: 1,
+      borderColor: theme.separator,
+    },
+    tipIcon: {
+      fontSize: 22,
+    },
+    tipContent: {
+      flex: 1,
+      gap: 2,
+    },
+    tipTitle: {
+      color: theme.label,
+      fontWeight: '600',
+    },
+    tipDesc: {
+      lineHeight: 18,
+    },
+
+    // Footer
+    footer: {
+      marginTop: 'auto',
+      gap: 12,
+    },
+    privacyNote: {
+      textAlign: 'center',
+      lineHeight: 18,
+      marginBottom: 4,
+    },
+    primaryButton: {
+      backgroundColor: theme.systemBlue,
+    },
+  });
+
   return (
     <View style={styles.container}>
       {/* Hero */}
@@ -56,7 +150,7 @@ export default function ScanIntroRoute() {
         <Typography variant="h1" style={styles.title}>
           Ready to scan
         </Typography>
-        <Typography variant="body" color="#8B92A1" style={styles.subtitle}>
+        <Typography variant="body" color={theme.secondaryLabel} style={styles.subtitle}>
           Quick tips for the best analysis
         </Typography>
       </View>
@@ -72,7 +166,7 @@ export default function ScanIntroRoute() {
               <Typography variant="body" style={styles.tipTitle}>
                 {tip.title}
               </Typography>
-              <Typography variant="caption" color="#8B92A1" style={styles.tipDesc}>
+              <Typography variant="caption" color={theme.secondaryLabel} style={styles.tipDesc}>
                 {tip.desc}
               </Typography>
             </View>
@@ -82,7 +176,7 @@ export default function ScanIntroRoute() {
 
       {/* Footer */}
       <View style={styles.footer}>
-        <Typography variant="caption" color="#A4A9B6" style={styles.privacyNote}>
+        <Typography variant="caption" color={theme.tertiaryLabel} style={styles.privacyNote}>
           🔒 Images are analyzed securely and never stored on our servers.
         </Typography>
 
@@ -104,95 +198,3 @@ export default function ScanIntroRoute() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 24,
-    paddingTop: 80,
-    paddingBottom: 34,
-  },
-
-  // Hero
-  heroSection: {
-    alignItems: 'center',
-    marginBottom: 32,
-  },
-  heroIconWrap: {
-    width: 100,
-    height: 100,
-    borderRadius: 28,
-    backgroundColor: '#F0F4FF',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 20,
-    borderWidth: 1,
-    borderColor: '#E3E9FF',
-  },
-  heroIcon: {
-    fontSize: 44,
-  },
-  title: {
-    color: '#121722',
-    marginBottom: 6,
-    textAlign: 'center',
-  },
-  subtitle: {
-    textAlign: 'center',
-    lineHeight: 22,
-  },
-
-  // Tips
-  tipsContainer: {
-    gap: 12,
-  },
-  tipCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F8F9FD',
-    borderRadius: 16,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: '#ECEEF5',
-    gap: 14,
-  },
-  tipIconWrap: {
-    width: 48,
-    height: 48,
-    borderRadius: 14,
-    backgroundColor: '#FFFFFF',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: '#E8ECF4',
-  },
-  tipIcon: {
-    fontSize: 22,
-  },
-  tipContent: {
-    flex: 1,
-    gap: 2,
-  },
-  tipTitle: {
-    color: '#121722',
-    fontWeight: '600',
-  },
-  tipDesc: {
-    lineHeight: 18,
-  },
-
-  // Footer
-  footer: {
-    marginTop: 'auto',
-    gap: 12,
-  },
-  privacyNote: {
-    textAlign: 'center',
-    lineHeight: 18,
-    marginBottom: 4,
-  },
-  primaryButton: {
-    backgroundColor: '#0D3DFF',
-  },
-});

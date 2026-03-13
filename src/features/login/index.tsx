@@ -3,14 +3,17 @@ import React, { useState } from 'react';
 import { View, StyleSheet, Platform, Alert } from 'react-native';
 import { Typography, Button } from '@src/ui/atoms';
 import { useAuth } from '@src/core/auth';
+import { useTheme, type ThemePalette } from '@config/theme';
 
 interface LoginScreenProps {
   onComplete: () => void;
 }
 
 export const LoginScreen = ({ onComplete }: LoginScreenProps) => {
+  const { theme, isDark } = useTheme();
   const { signInWithApple, signInWithGoogle } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const styles = React.useMemo(() => createStyles(theme, isDark), [theme, isDark]);
 
   const handleSignIn = async (method: () => Promise<void>) => {
     setIsLoading(true);
@@ -38,7 +41,7 @@ export const LoginScreen = ({ onComplete }: LoginScreenProps) => {
           <Typography variant="h1" style={styles.title}>
             PoopAI
           </Typography>
-          <Typography variant="body" color="#8E8E93" style={styles.subtitle}>
+          <Typography variant="body" color={theme.secondaryLabel} style={styles.subtitle}>
             Your gut health companion
           </Typography>
         </View>
@@ -50,6 +53,7 @@ export const LoginScreen = ({ onComplete }: LoginScreenProps) => {
               title="Continue with Apple"
               onPress={() => handleSignIn(signInWithApple)}
               loading={isLoading}
+              textColor={theme.background}
               style={styles.appleButton}
             />
           )}
@@ -62,7 +66,7 @@ export const LoginScreen = ({ onComplete }: LoginScreenProps) => {
             />
           )}
 
-          <Typography variant="caption" color="#C7C7CC" style={styles.legal}>
+          <Typography variant="caption" color={theme.tertiaryLabel} style={styles.legal}>
             By continuing, you agree to our Terms of Service and Privacy Policy.
           </Typography>
         </View>
@@ -71,47 +75,51 @@ export const LoginScreen = ({ onComplete }: LoginScreenProps) => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-  },
-  content: {
-    flex: 1,
-    justifyContent: 'space-between',
-    paddingHorizontal: 24,
-    paddingBottom: 24,
-  },
-  hero: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  icon: {
-    fontSize: 72,
-    marginBottom: 16,
-  },
-  title: {
-    color: '#000000',
-    fontSize: 34,
-    fontWeight: '700',
-    marginBottom: 6,
-  },
-  subtitle: {
-    fontSize: 17,
-    lineHeight: 22,
-  },
-  bottom: {
-    gap: 16,
-  },
-  appleButton: {
-    backgroundColor: '#000000',
-    borderRadius: 14,
-    paddingVertical: 18,
-  },
-  legal: {
-    textAlign: 'center',
-    lineHeight: 16,
-    paddingHorizontal: 20,
-  },
-});
+function createStyles(theme: ThemePalette, isDark: boolean) {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.background,
+    },
+    content: {
+      flex: 1,
+      justifyContent: 'space-between',
+      paddingHorizontal: 24,
+      paddingBottom: 24,
+    },
+    hero: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    icon: {
+      fontSize: 72,
+      marginBottom: 16,
+    },
+    title: {
+      color: theme.label,
+      fontSize: 34,
+      fontWeight: '700',
+      marginBottom: 6,
+    },
+    subtitle: {
+      fontSize: 17,
+      lineHeight: 22,
+    },
+    bottom: {
+      gap: 16,
+    },
+    appleButton: {
+      backgroundColor: theme.label,
+      borderColor: isDark ? theme.separator : 'transparent',
+      borderWidth: isDark ? 1 : 0,
+      borderRadius: 14,
+      paddingVertical: 18,
+    },
+    legal: {
+      textAlign: 'center',
+      lineHeight: 16,
+      paddingHorizontal: 20,
+    },
+  });
+}

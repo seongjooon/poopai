@@ -7,7 +7,7 @@ import {
   TextStyle,
 } from 'react-native';
 import { Typography } from '@src/ui/atoms';
-import { colors, spacing } from '@config/theme';
+import { spacing, useTheme } from '@config/theme';
 
 interface SettingsItemProps {
   label: string;
@@ -28,7 +28,41 @@ export const SettingsItem = ({
   style,
   labelStyle,
 }: SettingsItemProps) => {
-  const labelColor = isDangerous ? colors.error : colors.text;
+  const { theme } = useTheme();
+  const labelColor = isDangerous ? theme.error : theme.label;
+
+  const styles = StyleSheet.create({
+    container: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingVertical: spacing.m,
+      paddingHorizontal: spacing.l,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.separator,
+    },
+    disabled: {
+      opacity: 0.5,
+    },
+    content: {
+      flex: 1,
+    },
+    label: {
+      fontSize: 16,
+      fontWeight: '500',
+      marginBottom: spacing.s,
+    },
+    dangerousLabel: {
+      fontWeight: '600',
+    },
+    value: {
+      marginTop: spacing.s,
+    },
+    chevron: {
+      fontSize: 24,
+      marginLeft: spacing.m,
+    },
+  });
 
   return (
     <TouchableOpacity
@@ -51,7 +85,7 @@ export const SettingsItem = ({
         {value && (
           <Typography
             variant="caption"
-            color="#999999"
+            color={theme.secondaryLabel}
             style={styles.value}
           >
             {value}
@@ -61,7 +95,7 @@ export const SettingsItem = ({
 
       {/* Chevron Icon */}
       <Typography
-        color={isDangerous ? colors.error : colors.primary}
+        color={isDangerous ? theme.error : theme.tertiaryLabel}
         style={styles.chevron}
       >
         ›
@@ -69,36 +103,3 @@ export const SettingsItem = ({
     </TouchableOpacity>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: spacing.m,
-    paddingHorizontal: spacing.l,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  disabled: {
-    opacity: 0.5,
-  },
-  content: {
-    flex: 1,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: '500',
-    marginBottom: spacing.s,
-  },
-  dangerousLabel: {
-    fontWeight: '600',
-  },
-  value: {
-    marginTop: spacing.s,
-  },
-  chevron: {
-    fontSize: 24,
-    marginLeft: spacing.m,
-  },
-});
