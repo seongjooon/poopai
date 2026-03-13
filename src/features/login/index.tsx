@@ -1,6 +1,6 @@
 import { SafeAreaView } from 'react-native-safe-area-context';
 import React, { useState } from 'react';
-import { View, StyleSheet, Platform, Alert } from 'react-native';
+import { View, StyleSheet, Platform, Alert, Image } from 'react-native';
 import { Typography, Button } from '@src/ui/atoms';
 import { useAuth } from '@src/core/auth';
 import { useTheme, type ThemePalette } from '@config/theme';
@@ -37,12 +37,15 @@ export const LoginScreen = ({ onComplete }: LoginScreenProps) => {
       <View style={styles.content}>
         {/* Hero */}
         <View style={styles.hero}>
-          <Typography style={styles.icon}>💩</Typography>
+          <View style={styles.logoShell}>
+            <Image
+              source={require('../../../assets/icon.png')}
+              style={styles.logoImage}
+              resizeMode="cover"
+            />
+          </View>
           <Typography variant="h1" style={styles.title}>
             PoopAI
-          </Typography>
-          <Typography variant="body" color={theme.secondaryLabel} style={styles.subtitle}>
-            Your gut health companion
           </Typography>
         </View>
 
@@ -91,20 +94,29 @@ function createStyles(theme: ThemePalette, isDark: boolean) {
       flex: 1,
       alignItems: 'center',
       justifyContent: 'center',
+      gap: 18,
     },
-    icon: {
-      fontSize: 72,
-      marginBottom: 16,
+    logoShell: {
+      width: 150,
+      height: 150,
+      borderRadius: 34,
+      overflow: 'hidden',
+      backgroundColor: theme.elevatedBackground,
+      shadowColor: '#000000',
+      shadowOpacity: isDark ? 0.45 : 0.14,
+      shadowRadius: 18,
+      shadowOffset: { width: 0, height: 10 },
+      elevation: 10,
+    },
+    logoImage: {
+      width: '100%',
+      height: '100%',
     },
     title: {
       color: theme.label,
-      fontSize: 34,
+      fontSize: 42,
       fontWeight: '700',
-      marginBottom: 6,
-    },
-    subtitle: {
-      fontSize: 17,
-      lineHeight: 22,
+      letterSpacing: -0.8,
     },
     bottom: {
       gap: 16,
