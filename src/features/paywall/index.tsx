@@ -150,7 +150,12 @@ export const PaywallScreen = ({ onClose, isHardPaywall = false }: PaywallScreenP
           </Typography>
         </TouchableOpacity>
 
-        {/* Terms and Privacy */}
+        {/* Subscription Terms (Apple Required) */}
+        <Typography variant="caption" style={styles.subscriptionTerms}>
+          Payment will be charged to your Apple ID account at confirmation of purchase. Subscription automatically renews unless canceled at least 24 hours before the end of the current period. Your account will be charged for renewal within 24 hours prior to the end of the current period. You can manage and cancel your subscriptions by going to Settings {'>'} Apple ID {'>'} Subscriptions.
+        </Typography>
+
+        {/* Terms, Privacy & EULA */}
         <View style={styles.termsContainer}>
           <TouchableOpacity
             onPress={() => openLink('https://seongjooon.github.io/poopai/privacy/')}
@@ -169,12 +174,17 @@ export const PaywallScreen = ({ onClose, isHardPaywall = false }: PaywallScreenP
               Terms of Service
             </Typography>
           </TouchableOpacity>
-        </View>
 
-        {/* Disclaimer */}
-        <Typography variant="caption" style={styles.disclaimer}>
-          Auto-renewable subscription. Cancel anytime from App Store settings.
-        </Typography>
+          <Typography variant="caption" style={styles.separator}>•</Typography>
+
+          <TouchableOpacity
+            onPress={() => openLink('https://www.apple.com/legal/internet-services/itunes/dev/stdeula/')}
+          >
+            <Typography variant="caption" color={theme.primary} style={styles.link}>
+              EULA
+            </Typography>
+          </TouchableOpacity>
+        </View>
       </View>
     </SafeAreaView>
   );
@@ -282,10 +292,13 @@ function createStyles(theme: ThemePalette) {
     separator: {
       color: theme.separator,
     },
-    disclaimer: {
+    subscriptionTerms: {
       textAlign: 'center',
       color: theme.tertiaryLabel,
+      fontSize: 11,
+      lineHeight: 15,
       marginTop: spacing.m,
+      paddingHorizontal: spacing.s,
     },
   });
 }
