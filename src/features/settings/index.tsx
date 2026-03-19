@@ -97,6 +97,16 @@ export const SettingsScreen = ({ onClose }: SettingsScreenProps) => {
     proPromoText: {
       fontWeight: '600',
     },
+    disclaimerContainer: {
+      marginHorizontal: spacing.l,
+      marginTop: spacing.m,
+      marginBottom: spacing.s,
+    },
+    disclaimerText: {
+      textAlign: 'center',
+      fontSize: 11,
+      lineHeight: 15,
+    },
     lastItem: {
       borderBottomWidth: 0,
     },
@@ -265,6 +275,13 @@ export const SettingsScreen = ({ onClose }: SettingsScreenProps) => {
         </SettingsSection>
 
 
+
+        {/* Health Disclaimer */}
+        <View style={styles.disclaimerContainer}>
+          <Typography variant="caption" color={theme.tertiaryLabel} style={styles.disclaimerText}>
+            Poop AI is for informational and educational purposes only. It is not intended as medical advice, diagnosis, or treatment. Always consult a qualified healthcare professional for any health concerns.
+          </Typography>
+        </View>
 
         {/* Version Info Footer */}
         <VersionInfo version={APP_VERSION} buildNumber={BUILD_NUMBER} />

@@ -167,7 +167,7 @@ export function ResultCard({ result, onRetake, onDone }: ResultCardProps) {
           )}
 
           <Typography variant="caption" color={theme.tertiaryLabel} style={styles.disclaimer}>
-            PoopAI provides wellness insights only and is not a medical diagnosis.
+            For informational and educational purposes only. Not intended as medical advice, diagnosis, or treatment. Consult a healthcare professional for any health concerns.
           </Typography>
 
           <View style={styles.brandRow}>
