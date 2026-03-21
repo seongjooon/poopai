@@ -166,8 +166,27 @@ export function ResultCard({ result, onRetake, onDone }: ResultCardProps) {
             </View>
           )}
 
+          {/* References / Citations (Apple Guideline 1.4.1) */}
+          <View style={styles.referencesCard}>
+            <View style={styles.insightHeader}>
+              <Typography style={styles.insightIcon}>📖</Typography>
+              <Typography variant="body" color={theme.tertiaryLabel} style={styles.insightLabel}>
+                References
+              </Typography>
+            </View>
+            <Typography variant="caption" color={theme.secondaryLabel} style={styles.referenceText}>
+              • Bristol Stool Scale — Lewis, S.J. & Heaton, K.W. (1997). "Stool Form Scale as a Useful Guide to Intestinal Transit Time." Scandinavian Journal of Gastroenterology, 32(9), 920–924.
+            </Typography>
+            <Typography variant="caption" color={theme.secondaryLabel} style={styles.referenceText}>
+              • Stool color analysis — Mayo Clinic. "Stool color: When to worry." mayoclinic.org
+            </Typography>
+            <Typography variant="caption" color={theme.secondaryLabel} style={styles.referenceText}>
+              • Digestive health guidelines — National Institute of Diabetes and Digestive and Kidney Diseases (NIDDK), nih.gov
+            </Typography>
+          </View>
+
           <Typography variant="caption" color={theme.tertiaryLabel} style={styles.disclaimer}>
-            For informational and educational purposes only. Not intended as medical advice, diagnosis, or treatment. Consult a healthcare professional for any health concerns.
+            For informational and educational purposes only. Not intended as medical advice, diagnosis, or treatment. Always consult a qualified healthcare professional for any health concerns.
           </Typography>
 
           <View style={styles.brandRow}>
@@ -366,6 +385,18 @@ function createStyles(theme: ThemePalette) {
     warningText: {
       flex: 1,
       lineHeight: 22,
+    },
+    referencesCard: {
+      backgroundColor: theme.secondaryBackground,
+      borderRadius: 14,
+      padding: 14,
+      borderWidth: 1,
+      borderColor: theme.cardBorder,
+      gap: 6,
+    },
+    referenceText: {
+      fontSize: 11,
+      lineHeight: 16,
     },
     disclaimer: {
       lineHeight: 18,
