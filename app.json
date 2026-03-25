@@ -16,16 +16,18 @@
     ],
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.poopai.app",
+      "bundleIdentifier": "com.tovv.poopai",
+      "buildNumber": "24",
       "infoPlist": {
         "NSCameraUsageDescription": "PoopAI needs camera access to photograph and analyze your stool for gut health insights.",
-        "NSPhotoLibraryUsageDescription": "PoopAI can save your result card images to your photo library for sharing."
+        "NSPhotoLibraryUsageDescription": "PoopAI can save your result card images to your photo library for sharing.",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#1e293b"
       },
       "package": "com.poopai.app",
       "permissions": [
@@ -40,6 +42,12 @@
       "expo-apple-authentication",
       "@react-native-google-signin/google-signin"
     ],
-    "scheme": "poopai"
+    "scheme": "poopai",
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "00ec139f-5b06-4259-83cc-f1dba37baa98"
+      }
+    }
   }
 }
