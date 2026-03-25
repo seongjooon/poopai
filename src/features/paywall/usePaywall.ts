@@ -34,7 +34,7 @@ const MOCK_PACKAGES: MockPackage[] = [
 export const usePaywall = (onComplete?: () => void) => {
   const { purchasePackage, restorePurchases, isPro, offerings, isLoading, initialize } = usePayments();
   const [isPurchasing, setIsPurchasing] = useState(false);
-  const [selectedPackageId, setSelectedPackageId] = useState<string>('annual');
+  const [selectedPackageId, setSelectedPackageId] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [trialEligible, setTrialEligible] = useState(true);
 
@@ -70,6 +70,25 @@ export const usePaywall = (onComplete?: () => void) => {
         rcPackage: pkg, // Keep reference for purchase
       }))
     : MOCK_PACKAGES;
+
+  // Always keep a valid selected package so CTA button is tappable on first render.
+  useEffect(() => {
+    if (packages.length === 0) {
+      if (selectedPackageId) setSelectedPackageId('');
+      return;
+    }
+
+    const hasSelected = packages.some((p) => p.id === selectedPackageId);
+    if (hasSelected) return;
+
+    // Prefer annual plan as default when available, otherwise fallback to first package.
+    const preferred =
+      packages.find((p) => p.id === 'annual') ??
+      packages.find((p) => p.name.toLowerCase().includes('annual')) ??
+      packages[0];
+
+    setSelectedPackageId(preferred.id);
+  }, [packages, selectedPackageId]);
 
   const selectPackage = useCallback((id: string) => {
     setSelectedPackageId(id);
