@@ -123,7 +123,7 @@ export const PaywallScreen = ({ onClose, isHardPaywall = false }: PaywallScreenP
         <Button
           title={getCtaText()}
           onPress={handlePurchase}
-          disabled={isPurchasing || !selectedPackage}
+          disabled={isPurchasing}
           loading={isPurchasing}
           style={styles.subscribeButton}
         />

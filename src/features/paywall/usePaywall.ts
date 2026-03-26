@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { Alert } from 'react-native';
+import Constants from 'expo-constants';
 import { usePayments } from '@src/core/payments';
 import { PurchasesPackage } from 'react-native-purchases';
 
@@ -55,9 +56,11 @@ export const usePaywall = (onComplete?: () => void) => {
     }
   }, [offerings]);
 
-  // Get packages from RevenueCat or use mock
+  // Get packages from RevenueCat or use mock (dev only)
   const rcPackages = offerings?.current?.availablePackages ?? [];
   const hasRealPackages = rcPackages.length > 0;
+  const isExpoGo = Constants.appOwnership === 'expo';
+  const allowMockPurchase = __DEV__ || isExpoGo;
 
   // Convert to unified format for UI
   const packages = hasRealPackages
@@ -69,7 +72,9 @@ export const usePaywall = (onComplete?: () => void) => {
         isPopular: pkg.packageType === 'ANNUAL',
         rcPackage: pkg, // Keep reference for purchase
       }))
-    : MOCK_PACKAGES;
+    : allowMockPurchase
+      ? MOCK_PACKAGES
+      : [];
 
   // Always keep a valid selected package so CTA button is tappable on first render.
   useEffect(() => {
@@ -95,20 +100,33 @@ export const usePaywall = (onComplete?: () => void) => {
   }, []);
 
   const handlePurchase = useCallback(async () => {
+    setErrorMessage(null);
+
+    if (isLoading) {
+      Alert.alert('Please wait', 'Preparing purchase options. Please try again in a moment.');
+      return;
+    }
+
     const pkg = packages.find((p) => p.id === selectedPackageId);
     if (!pkg) {
-      console.warn('[Paywall] Purchase skipped: no selected package');
+      console.warn('[Paywall] Purchase blocked: no selected package', {
+        selectedPackageId,
+        packageCount: packages.length,
+      });
+      setErrorMessage('Unable to load subscription plans. Please try again.');
+      Alert.alert('Subscription Unavailable', 'Could not load subscription plans. Please tap again in a few seconds.');
+      initialize();
       return;
     }
 
     setIsPurchasing(true);
-    setErrorMessage(null);
 
     try {
       console.log('[Paywall] Purchase started', {
         selectedPackageId,
         hasRealPackages,
         trialEligible,
+        allowMockPurchase,
       });
 
       if (hasRealPackages && 'rcPackage' in pkg) {
@@ -125,9 +143,16 @@ export const usePaywall = (onComplete?: () => void) => {
           Alert.alert('Purchase Pending', message);
           return;
         }
-      } else {
-        // Mock purchase for development
+      } else if (allowMockPurchase) {
+        // Mock purchase for development only
         console.log('[Paywall] Mock purchase:', pkg.id);
+      } else {
+        const message = 'Subscriptions are temporarily unavailable. Please try again in a few seconds.';
+        console.error('[Paywall] Blocking purchase in production: no RevenueCat offerings available');
+        setErrorMessage(message);
+        Alert.alert('Subscription Unavailable', message);
+        initialize();
+        return;
       }
 
       console.log('[Paywall] Purchase flow complete');
@@ -148,7 +173,17 @@ export const usePaywall = (onComplete?: () => void) => {
     } finally {
       setIsPurchasing(false);
     }
-  }, [selectedPackageId, packages, hasRealPackages, purchasePackage, onComplete, trialEligible]);
+  }, [
+    selectedPackageId,
+    packages,
+    hasRealPackages,
+    purchasePackage,
+    onComplete,
+    trialEligible,
+    isLoading,
+    initialize,
+    allowMockPurchase,
+  ]);
 
   const handleRestore = useCallback(async () => {
     setIsPurchasing(true);
