@@ -214,6 +214,13 @@ export const usePaywall = (onComplete?: () => void) => {
     }
   }, [restorePurchases, onComplete]);
 
+  const diagnostics = {
+    offeringsCurrentId: offerings?.current?.identifier ?? null,
+    offeringsPackageCount: offerings?.current?.availablePackages?.length ?? 0,
+    selectedPackageId,
+    hasRealPackages,
+  };
+
   return {
     packages,
     selectedPackageId,
@@ -221,6 +228,7 @@ export const usePaywall = (onComplete?: () => void) => {
     errorMessage,
     isPro,
     trialEligible,
+    diagnostics,
     selectPackage,
     handlePurchase,
     handleRestore,

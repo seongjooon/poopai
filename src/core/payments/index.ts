@@ -57,6 +57,14 @@ export const usePayments = create<PaymentState>((set, get) => ({
     try {
       const customerInfo = await Purchases.getCustomerInfo();
       const offerings = await Purchases.getOfferings();
+      const currentOfferingId = offerings?.current?.identifier ?? null;
+      const packageCount = offerings?.current?.availablePackages?.length ?? 0;
+
+      console.log('[Payments] Offerings loaded', {
+        currentOfferingId,
+        packageCount,
+        packageProductIds: (offerings?.current?.availablePackages ?? []).map((p) => p.product.identifier),
+      });
 
       set({
         customerInfo,

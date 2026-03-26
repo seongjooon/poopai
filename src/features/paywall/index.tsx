@@ -28,6 +28,7 @@ export const PaywallScreen = ({ onClose, isHardPaywall = false }: PaywallScreenP
     isPurchasing,
     errorMessage,
     trialEligible,
+    diagnostics,
     selectPackage,
     handlePurchase,
     handleRestore,
@@ -107,6 +108,15 @@ export const PaywallScreen = ({ onClose, isHardPaywall = false }: PaywallScreenP
               onSelect={(p) => selectPackage(p.id)}
             />
           ))}
+
+          {packages.length === 0 && (
+            <View style={styles.errorContainer}>
+              <Typography color={theme.error}>Unable to load subscription plans.</Typography>
+              <Typography variant="caption" style={styles.debugText}>
+                RC current offering: {diagnostics.offeringsCurrentId ?? 'none'} / packages: {diagnostics.offeringsPackageCount}
+              </Typography>
+            </View>
+          )}
         </View>
 
         {/* Error Message */}
@@ -255,6 +265,10 @@ function createStyles(theme: ThemePalette) {
       marginBottom: spacing.m,
       borderWidth: 1,
       borderColor: theme.error,
+    },
+    debugText: {
+      marginTop: spacing.s,
+      color: theme.tertiaryLabel,
     },
     footer: {
       borderTopWidth: 1,
