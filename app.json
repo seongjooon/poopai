@@ -17,7 +17,7 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.tovv.poopai",
-      "buildNumber": "24",
+      "buildNumber": "25",
       "infoPlist": {
         "NSCameraUsageDescription": "PoopAI needs camera access to photograph and analyze your stool for gut health insights.",
         "NSPhotoLibraryUsageDescription": "PoopAI can save your result card images to your photo library for sharing.",
