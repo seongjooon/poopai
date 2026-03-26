@@ -10,7 +10,7 @@ export const SECRETS = {
   // 🔵 RevenueCat (In-App Purchases & Subscriptions)
   // Get this from: https://app.revenuecat.com/projects
   // Navigate to: Project Settings → API Keys → Public SDK key
-  REVENUECAT_PUBLIC_KEY: process.env.EXPO_PUBLIC_RC_KEY ?? 'app1_vEEfoEaLIZzcrisWsGJx1VRiDJR',
+  REVENUECAT_PUBLIC_KEY: process.env.EXPO_PUBLIC_RC_KEY ?? 'appl_vEEroEaLIZzcrisWsGJxlVRiDiR',
 
   // 🟢 Supabase (Backend & Authentication)
   // Get these from: https://supabase.com/dashboard/project/YOUR_PROJECT/settings/api
