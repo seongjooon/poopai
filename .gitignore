@@ -44,3 +44,7 @@ yarn-error.*
 # config/secrets.ts  # included in repo — values use env var fallbacks
 .env
 google-service-account.json
+
+# EAS local credentials (contains certificate password)
+credentials.json
+credentials/
