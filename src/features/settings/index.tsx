@@ -7,6 +7,8 @@ import {
   Alert,
   TouchableOpacity,
 } from 'react-native';
+import * as Application from 'expo-application';
+import Constants, { ExecutionEnvironment } from 'expo-constants';
 import { Typography } from '@src/ui/atoms';
 import {
   SettingsItem,
@@ -15,6 +17,15 @@ import {
 } from './components';
 import { useSettings } from './useSettings';
 import { spacing, useTheme, type ThemeMode } from '@config/theme';
+
+// In Expo Go the native values belong to the Expo Go host app, so fall back to
+// the config version there and omit the build number.
+const isExpoGo = Constants.executionEnvironment === ExecutionEnvironment.StoreClient;
+const APP_VERSION =
+  (isExpoGo ? null : Application.nativeApplicationVersion) ??
+  Constants.expoConfig?.version ??
+  'unknown';
+const BUILD_NUMBER = (isExpoGo ? null : Application.nativeBuildVersion) ?? undefined;
 
 interface SettingsScreenProps {
   onClose?: () => void;
@@ -34,8 +45,6 @@ export const SettingsScreen = ({ onClose }: SettingsScreenProps) => {
     handleResetOnboarding,
   } = useSettings();
 
-  const APP_VERSION = '1.0.0';
-  const BUILD_NUMBER = '1';
   const themeOptions: Array<{ label: string; value: ThemeMode }> = [
     { label: 'System', value: 'system' },
     { label: 'Light', value: 'light' },
