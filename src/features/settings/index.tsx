@@ -42,7 +42,6 @@ export const SettingsScreen = ({ onClose }: SettingsScreenProps) => {
     handleRestorePurchases,
     openURL,
     sendEmail,
-    handleResetOnboarding,
   } = useSettings();
 
   const themeOptions: Array<{ label: string; value: ThemeMode }> = [
