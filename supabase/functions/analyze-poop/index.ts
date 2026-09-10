@@ -1,11 +1,44 @@
 // @ts-nocheck
 // deno-lint-ignore-file no-explicit-any
 import { serve } from 'https://deno.land/std@0.224.0/http/server.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.1';
 
 const geminiApiKey = Deno.env.get('GEMINI_API_KEY');
+const supabaseUrl = Deno.env.get('SUPABASE_URL');
+const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
 
 if (!geminiApiKey) {
   console.warn('[analyze-poop] GEMINI_API_KEY is not set');
+}
+
+// Base64 inflates by ~4/3, so 8M chars ≈ 6 MB of JPEG. The camera captures at
+// quality 0.7, which lands well under this on current phones.
+const MAX_IMAGE_BASE64_LENGTH = 8 * 1024 * 1024;
+// Cheap early rejection before parsing the body: image + JSON envelope slack.
+const MAX_BODY_BYTES = MAX_IMAGE_BASE64_LENGTH + 64 * 1024;
+const BASE64_PATTERN = /^[A-Za-z0-9+/]+={0,2}$/;
+
+/**
+ * Resolve the calling user from the bearer token. The API gateway only checks
+ * that the JWT is signed by the project, which the public anon key also passes,
+ * so we must verify there is a real user session behind the request.
+ */
+async function getRequestUser(req: Request) {
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader || !authHeader.startsWith('Bearer ')) return null;
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.error('[analyze-poop] SUPABASE_URL / SUPABASE_ANON_KEY not available');
+    return null;
+  }
+
+  const client = createClient(supabaseUrl, supabaseAnonKey, {
+    global: { headers: { Authorization: authHeader } },
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+
+  const { data: { user }, error } = await client.auth.getUser();
+  if (error || !user) return null;
+  return user;
 }
 
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiApiKey}`;
@@ -111,8 +144,18 @@ serve(async (req) => {
     return jsonResponse(405, { error: 'Method not allowed' });
   }
 
+  const user = await getRequestUser(req);
+  if (!user) {
+    return jsonResponse(401, { error: 'Authentication required' });
+  }
+
   if (!geminiApiKey) {
     return jsonResponse(500, { error: 'Server is missing GEMINI_API_KEY' });
+  }
+
+  const contentLength = Number(req.headers.get('content-length') ?? 0);
+  if (contentLength > MAX_BODY_BYTES) {
+    return jsonResponse(413, { error: 'Request body too large' });
   }
 
   try {
@@ -122,6 +165,19 @@ serve(async (req) => {
     if (!imageBase64 || typeof imageBase64 !== 'string') {
       return jsonResponse(400, { error: 'imageBase64 is required' });
     }
+
+    if (imageBase64.length > MAX_IMAGE_BASE64_LENGTH) {
+      return jsonResponse(413, {
+        error: 'Image too large',
+        detail: `imageBase64 must be at most ${MAX_IMAGE_BASE64_LENGTH} characters`,
+      });
+    }
+
+    if (!BASE64_PATTERN.test(imageBase64)) {
+      return jsonResponse(400, { error: 'imageBase64 must be raw base64 without a data URI prefix' });
+    }
+
+    console.log('[analyze-poop] request', { userId: user.id, imageChars: imageBase64.length });
 
     const geminiBody = {
       contents: [
