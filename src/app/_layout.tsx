@@ -8,6 +8,7 @@ import { usePayments, configurePayments } from '../core/payments';
 import { Analytics } from '../core/analytics';
 import Constants, { ExecutionEnvironment } from 'expo-constants';
 import { ThemeProvider, useTheme } from '@config/theme';
+import { ErrorBoundary } from '../core/error/ErrorBoundary';
 import { Typography } from '../ui/atoms';
 
 // In Expo Go, RevenueCat native store is unavailable — skip paywall gate
@@ -168,7 +169,9 @@ function RootLayoutContent() {
 export default function RootLayout() {
   return (
     <ThemeProvider>
-      <RootLayoutContent />
+      <ErrorBoundary>
+        <RootLayoutContent />
+      </ErrorBoundary>
     </ThemeProvider>
   );
 }
