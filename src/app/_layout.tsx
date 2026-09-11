@@ -6,12 +6,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '../core/auth';
 import { usePayments, configurePayments } from '../core/payments';
 import { Analytics } from '../core/analytics';
-import Constants from 'expo-constants';
+import Constants, { ExecutionEnvironment } from 'expo-constants';
 import { ThemeProvider, useTheme } from '@config/theme';
 import { Typography } from '../ui/atoms';
 
 // In Expo Go, RevenueCat native store is unavailable — skip paywall gate
-const isExpoGo = Constants.appOwnership === 'expo';
+const isExpoGo = Constants.executionEnvironment === ExecutionEnvironment.StoreClient;
 
 
 function SplashLoadingScreen() {

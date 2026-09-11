@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { Alert } from 'react-native';
-import Constants from 'expo-constants';
+import Constants, { ExecutionEnvironment } from 'expo-constants';
 import { usePayments } from '@src/core/payments';
 import { PurchasesPackage } from 'react-native-purchases';
 
@@ -59,7 +59,7 @@ export const usePaywall = (onComplete?: () => void) => {
   // Get packages from RevenueCat or use mock (dev only)
   const rcPackages = offerings?.current?.availablePackages ?? [];
   const hasRealPackages = rcPackages.length > 0;
-  const isExpoGo = Constants.appOwnership === 'expo';
+  const isExpoGo = Constants.executionEnvironment === ExecutionEnvironment.StoreClient;
   const allowMockPurchase = __DEV__ || isExpoGo;
 
   // Convert to unified format for UI
