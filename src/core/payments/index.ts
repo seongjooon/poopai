@@ -32,6 +32,11 @@ interface PaymentState {
   restorePurchases: () => Promise<void>;
 }
 
+// initialize() runs on every login and paywall mount, and RevenueCat's
+// addCustomerInfoUpdateListener has no replace semantics — each call stacks
+// another listener. Register exactly once for the lifetime of the process.
+let hasCustomerInfoListener = false;
+
 const checkEntitlement = (customerInfo: CustomerInfo | null): boolean => {
   if (!customerInfo) return false;
   // Check for "pro" or "premium" entitlement - adjust to match your RevenueCat setup
@@ -74,9 +79,12 @@ export const usePayments = create<PaymentState>((set, get) => ({
       });
 
       // Listen for customer info updates
-      Purchases.addCustomerInfoUpdateListener((info) => {
-        set({ customerInfo: info, isPro: checkEntitlement(info) });
-      });
+      if (!hasCustomerInfoListener) {
+        hasCustomerInfoListener = true;
+        Purchases.addCustomerInfoUpdateListener((info) => {
+          set({ customerInfo: info, isPro: checkEntitlement(info) });
+        });
+      }
     } catch (error) {
       console.error('[Payments] Init error:', error);
       set({ isLoading: false });
